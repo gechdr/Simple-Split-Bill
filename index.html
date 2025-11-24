@@ -127,7 +127,7 @@
         };
 
         // --- CUSTOM ACCOUNT SELECTOR COMPONENT ---
-        const AccountSelector = ({ options, selectedValue, onChange, label, customName, customNumber, customVendor, onCustomNameChange, onCustomNumberChange, onCustomVendorChange }) => {
+        const AccountSelector = ({ options, selectedValue, onChange, label, customName, customNumber, customVendor, onCustomNameChange, onCustomNumberChange, onCustomVendorChange, onSaveCustomAccount, onDeleteAccount }) => {
             const [isOpen, setIsOpen] = useState(false);
             const [showCustomInput, setShowCustomInput] = useState(selectedValue === 'CUSTOM');
             const dropdownRef = useRef(null);
@@ -147,11 +147,28 @@
             }, [selectedValue]);
 
             const selectedOption = options.find(opt => opt.number === selectedValue) || options[0];
+            
+            // Separate custom and regular accounts
+            const customOption = options.find(opt => opt.number === 'CUSTOM');
+            const regularAccounts = options.filter(opt => opt.number !== 'CUSTOM');
 
             const handleSelect = (accountNumber) => {
                 onChange(accountNumber);
                 setIsOpen(false);
                 setShowCustomInput(accountNumber === 'CUSTOM');
+            };
+
+            const handleDelete = (e, accountNumber) => {
+                e.stopPropagation(); // Prevent dropdown item click
+                if (accountNumber !== 'CUSTOM' && onDeleteAccount) {
+                    onDeleteAccount(accountNumber);
+                }
+            };
+
+            const handleSaveCustom = () => {
+                if (customName.trim() && customNumber.trim() && customVendor.trim()) {
+                    onSaveCustomAccount();
+                }
             };
 
             return (
@@ -175,30 +192,68 @@
 
                         {isOpen && (
                             <div className="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-lg py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none animate-fade-in sm:text-sm">
-                                {options.map((option, index) => (
+                                {/* Regular accounts first */}
+                                {regularAccounts.map((option, index) => (
                                     <div
                                         key={index}
-                                        className={`cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-gray-50 transition ${
+                                        className={`cursor-pointer select-none relative py-3 pl-10 pr-4 hover:bg-gray-50 transition ${
                                             option.number === selectedValue ? 'bg-gray-50 text-gray-900 font-medium' : 'text-gray-700'
                                         }`}
                                         onClick={() => handleSelect(option.number)}
                                     >
-                                        <div className="flex flex-col">
-                                            <span className="block truncate font-semibold">
-                                                {option.number === 'CUSTOM' ? '➕ Custom Account' : `${option.name} - ${option.vendor}`}
-                                            </span>
-                                            {option.number !== 'CUSTOM' && (
-                                                <span className="block truncate text-xs text-gray-500">{option.number}</span>
-                                            )}
-                                        </div>
-                                        
                                         {option.number === selectedValue && (
-                                            <span className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-900">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900">
                                                 <Check className="w-4 h-4" />
                                             </span>
                                         )}
+                                        
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex flex-col flex-1 min-w-0 pr-2">
+                                                <span className="block truncate font-semibold">
+                                                    {`${option.name} - ${option.vendor}`}
+                                                </span>
+                                                <span className="block truncate text-xs text-gray-500">{option.number}</span>
+                                            </div>
+                                            
+                                            <button
+                                                onClick={(e) => handleDelete(e, option.number)}
+                                                className="text-gray-400 hover:text-red-500 transition p-1 rounded hover:bg-red-50 flex-shrink-0"
+                                                title="Hapus rekening"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
+                                
+                                {/* Divider if there are regular accounts */}
+                                {regularAccounts.length > 0 && (
+                                    <div className="border-t border-gray-200 my-1"></div>
+                                )}
+                                
+                                {/* Custom option at the bottom */}
+                                {customOption && (
+                                    <div
+                                        className={`cursor-pointer select-none relative py-3 pl-10 pr-4 hover:bg-gray-50 transition ${
+                                            customOption.number === selectedValue ? 'bg-gray-50 text-gray-900 font-medium' : 'text-gray-700'
+                                        }`}
+                                        onClick={() => handleSelect(customOption.number)}
+                                    >
+                                        {customOption.number === selectedValue && (
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-900">
+                                                <Check className="w-4 h-4" />
+                                            </span>
+                                        )}
+                                        
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex flex-col flex-1 min-w-0 pr-2">
+                                                <span className="block truncate font-semibold">
+                                                    ➕ Custom Account
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -236,6 +291,14 @@
                                     className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none bg-white text-base sm:text-sm"
                                 />
                             </div>
+                            <button
+                                onClick={handleSaveCustom}
+                                disabled={!customName.trim() || !customNumber.trim() || !customVendor.trim()}
+                                className="w-full bg-gray-900 text-white py-2.5 rounded-lg hover:bg-black transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm font-medium"
+                            >
+                                <Plus className="w-4 h-4" />
+                                Simpan Rekening
+                            </button>
                         </div>
                     )}
                 </div>
@@ -272,7 +335,7 @@
 
         // --- MAIN APP ---
         function SplitBill() {
-            const appVersion = 'v1.2.0';
+            const appVersion = 'v1.4.0';
             const STORAGE_KEY = 'splitBillData';
             
             // Load initial data from localStorage or use defaults
@@ -302,11 +365,14 @@
             const [diskon, setDiskon] = useState(initialData?.diskon || '');
             const [voucher, setVoucher] = useState(initialData?.voucher || '');
             
-            const [bankAccounts] = useState([
-                { name: 'Custom', number: 'CUSTOM', vendor: 'Custom' }
-            ]);
+            const [bankAccounts, setBankAccounts] = useState(
+                initialData?.bankAccounts || [
+                    { name: 'Custom', number: 'CUSTOM', vendor: 'Custom' }
+                ]
+            );
+            
             const [selectedAccount, setSelectedAccount] = useState(
-                initialData?.selectedAccount || bankAccounts[0].number
+                initialData?.selectedAccount || bankAccounts[0]?.number || 'CUSTOM'
             );
             const [customAccountName, setCustomAccountName] = useState(initialData?.customAccountName || '');
             const [customAccountNumber, setCustomAccountNumber] = useState(initialData?.customAccountNumber || '');
@@ -333,6 +399,7 @@
                     tax,
                     diskon,
                     voucher,
+                    bankAccounts,
                     selectedAccount,
                     customAccountName,
                     customAccountNumber,
@@ -345,7 +412,54 @@
                 } catch (error) {
                     console.error('Error saving to localStorage:', error);
                 }
-            }, [items, persons, ongkir, biayaLayanan, tax, diskon, voucher, selectedAccount, customAccountName, customAccountNumber, customAccountVendor]);
+            }, [items, persons, ongkir, biayaLayanan, tax, diskon, voucher, bankAccounts, selectedAccount, customAccountName, customAccountNumber, customAccountVendor]);
+
+            const saveCustomAccount = () => {
+                if (customAccountName.trim() && customAccountNumber.trim() && customAccountVendor.trim()) {
+                    const newAccount = {
+                        name: customAccountName.trim(),
+                        number: customAccountNumber.trim(),
+                        vendor: customAccountVendor.trim()
+                    };
+                    
+                    // Check if account already exists
+                    const accountExists = bankAccounts.some(
+                        acc => acc.number === newAccount.number && acc.number !== 'CUSTOM'
+                    );
+                    
+                    if (!accountExists) {
+                        const updatedAccounts = [...bankAccounts, newAccount];
+                        setBankAccounts(updatedAccounts);
+                        setSelectedAccount(newAccount.number);
+                        
+                        // Clear custom fields
+                        setCustomAccountName('');
+                        setCustomAccountNumber('');
+                        setCustomAccountVendor('');
+                        
+                        setCaptureStatus('Rekening berhasil disimpan!');
+                        setTimeout(() => setCaptureStatus(''), 2000);
+                    } else {
+                        setCaptureStatus('Rekening sudah ada!');
+                        setTimeout(() => setCaptureStatus(''), 2000);
+                    }
+                }
+            };
+
+            const deleteBankAccount = (accountNumber) => {
+                if (accountNumber === 'CUSTOM') return; // Can't delete the custom option
+                
+                const updatedAccounts = bankAccounts.filter(acc => acc.number !== accountNumber);
+                setBankAccounts(updatedAccounts);
+                
+                // If the deleted account was selected, switch to CUSTOM
+                if (selectedAccount === accountNumber) {
+                    setSelectedAccount('CUSTOM');
+                }
+                
+                setCaptureStatus('Rekening berhasil dihapus!');
+                setTimeout(() => setCaptureStatus(''), 2000);
+            };
 
             const resetAllData = () => {
                 setItems([{ id: 1, name: '', price: '', persons: [] }]);
@@ -356,15 +470,33 @@
                 setTax('');
                 setDiskon('');
                 setVoucher('');
-                setSelectedAccount(bankAccounts[0].number);
+                // Don't reset bank accounts - keep them
+                setSelectedAccount('CUSTOM');
                 setCustomAccountName('');
                 setCustomAccountNumber('');
                 setCustomAccountVendor('');
                 
+                // Save current bank accounts before resetting
+                const dataToSave = {
+                    items: [{ id: 1, name: '', price: '', persons: [] }],
+                    persons: [],
+                    ongkir: '',
+                    biayaLayanan: '',
+                    tax: '',
+                    diskon: '',
+                    voucher: '',
+                    bankAccounts: bankAccounts, // Preserve bank accounts
+                    selectedAccount: 'CUSTOM',
+                    customAccountName: '',
+                    customAccountNumber: '',
+                    customAccountVendor: '',
+                    lastSaved: new Date().toISOString()
+                };
+                
                 try {
-                    localStorage.removeItem(STORAGE_KEY);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
                 } catch (error) {
-                    console.error('Error removing from localStorage:', error);
+                    console.error('Error saving to localStorage:', error);
                 }
                 
                 setShowResetModal(false);
@@ -961,6 +1093,8 @@
                                         onCustomNameChange={setCustomAccountName}
                                         onCustomNumberChange={setCustomAccountNumber}
                                         onCustomVendorChange={setCustomAccountVendor}
+                                        onSaveCustomAccount={saveCustomAccount}
+                                        onDeleteAccount={deleteBankAccount}
                                     />
                                 </div>
                             </div>
