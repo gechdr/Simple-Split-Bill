@@ -584,7 +584,7 @@
 
         // --- MAIN APP ---
         function SplitBill() {
-            const appVersion = 'v2.3.0';
+            const appVersion = 'v2.4.0';
             const STORAGE_KEY = 'splitBillData';
             const LANGUAGE_KEY = 'splitBillLanguage';
             
@@ -1794,7 +1794,7 @@
                                                                 
                                                                 {/* Accordion Content */}
                                                                 {isOpen && (
-                                                                    <div className="border-t border-gray-100 dark:border-gray-600 p-3 bg-gray-50 dark:bg-gray-800 animate-slide-down">
+                                                                    <div className="border-t border-gray-100 dark:border-gray-600 p-3 bg-gray-50 dark:bg-gray-800">
                                                                         <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                                                                             {t.orderDetails}
                                                                         </div>
@@ -1836,7 +1836,7 @@
                                                                                 {/* Order Subtotal */}
                                                                                 <div className="border-t border-gray-200 dark:border-gray-700 pt-2 flex justify-between items-center text-xs">
                                                                                     <span className="font-semibold text-gray-700 dark:text-gray-300">Order Subtotal:</span>
-                                                                                    <span className="font-mono font-semibold text-gray-900 dark:text-gray-100">
+                                                                                    <span className="font-mono font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
                                                                                         Rp {formatMoneySplit(personSubtotals[person] || 0)}
                                                                                     </span>
                                                                                 </div>
@@ -1845,7 +1845,7 @@
                                                                                 {netSharedAmount !== 0 && subtotal > 0 && (
                                                                                     <div className={`flex justify-between items-center text-xs ${netSharedAmount < 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}`}>
                                                                                         <span>Net Shared ({netSharedAmount < 0 ? 'Discount' : 'Fees'}):</span>
-                                                                                        <span className="font-mono">
+                                                                                        <span className="font-mono whitespace-nowrap">
                                                                                             {netSharedAmount < 0 ? '- ' : '+ '}Rp {formatMoneySplit(Math.abs(netSharedAmount * (personSubtotals[person] / subtotal)))}
                                                                                         </span>
                                                                                     </div>
@@ -1854,15 +1854,15 @@
                                                                                 {/* Final total */}
                                                                                 <div className="border-t border-gray-300 dark:border-gray-600 pt-2 flex justify-between items-center text-xs">
                                                                                     <span className="font-bold text-gray-900 dark:text-gray-100">{t.total}:</span>
-                                                                                    <span className="font-mono font-bold text-gray-900 dark:text-gray-100">
+                                                                                    <span className="font-mono font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">
                                                                                         {roundTo100 && (personTotals[person] || 0) !== roundToNearest100(personTotals[person] || 0) ? (
-                                                                                            <>
+                                                                                            <span className="inline-block">
                                                                                                 <span className="text-gray-400 dark:text-gray-500">Rp {formatMoneySplit(personTotals[person] || 0)}</span>
-                                                                                                <span className="mx-1 text-gray-400 dark:text-gray-500">→</span>
+                                                                                                <span className="mx-1 text-gray-400 dark:text-gray-500">&rarr;</span>
                                                                                                 <span className="text-green-600 dark:text-green-400">Rp {formatMoneySplit(roundToNearest100(personTotals[person] || 0))}</span>
-                                                                                            </>
+                                                                                            </span>
                                                                                         ) : (
-                                                                                            `Rp ${formatMoneySplit(personTotals[person] || 0)}`
+                                                                                            <span>Rp {formatMoneySplit(personTotals[person] || 0)}</span>
                                                                                         )}
                                                                                     </span>
                                                                                 </div>
