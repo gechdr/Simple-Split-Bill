@@ -22,7 +22,7 @@
                     },
                     animation: {
                         'slide-down': 'slideDown 0.2s ease-out',
-                        'fade-in': 'fadeIn 0.2s ease-out'
+                        'fade-in': 'fadeIn 0.5s ease-out'
                     },
                     keyframes: {
                         slideDown: {
@@ -584,7 +584,7 @@
 
         // --- MAIN APP ---
         function SplitBill() {
-            const appVersion = 'v2.4.0';
+            const appVersion = 'v2.4.1';
             const STORAGE_KEY = 'splitBillData';
             const LANGUAGE_KEY = 'splitBillLanguage';
             
@@ -815,6 +815,7 @@
                 setCustomAccountName('');
                 setCustomAccountNumber('');
                 setCustomAccountVendor('');
+                setRoundTo100(false);
                 
                 const dataToSave = {
                     items: [{ id: 1, name: '', price: '', persons: [], priceType: 'unit' }],
@@ -830,6 +831,7 @@
                     customAccountName: '',
                     customAccountNumber: '',
                     customAccountVendor: '',
+                    roundTo100: false,
                     lastSaved: new Date().toISOString()
                 };
                 
@@ -1904,8 +1906,8 @@
 
                             {/* Status Notification */}
                             {(captureStatus || isScanning) && (
-                                <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-slide-down w-[90%] max-w-xs sm:max-w-sm">
-                                    <div className="px-4 py-3 rounded-lg shadow-xl font-medium border text-sm sm:text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white">
+                                <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-xs sm:max-w-sm">
+                                    <div className="px-4 py-3 rounded-lg shadow-xl font-medium border text-sm sm:text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white animate-fade-in">
                                         <div className="flex items-center justify-center gap-2">
                                             {(captureStatus.includes('Processing') || captureStatus.includes('Memproses') || isScanning) && (
                                                 <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
