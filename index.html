@@ -998,7 +998,28 @@
           try {
             const savedData = localStorage.getItem(STORAGE_KEY);
             if (savedData) {
-              return JSON.parse(savedData);
+              const parsed = JSON.parse(savedData);
+
+              // Migrate: Convert string quantities to numbers
+              if (parsed.items) {
+                parsed.items = parsed.items.map((item) => {
+                  const newPersons = {};
+                  if (item.persons && typeof item.persons === "object") {
+                    Object.keys(item.persons).forEach((person) => {
+                      const qty = Number(item.persons[person]);
+                      if (!isNaN(qty) && qty > 0) {
+                        newPersons[person] = qty;
+                      }
+                    });
+                  }
+                  return {
+                    ...item,
+                    persons: newPersons,
+                  };
+                });
+              }
+
+              return parsed;
             }
           } catch (error) {
             console.error("Error loading from localStorage:", error);
@@ -1010,7 +1031,7 @@
 
         const [items, setItems] = useState(
           initialData?.items || [
-            { id: 1, name: "", price: "", persons: [], priceType: "unit" },
+            { id: 1, name: "", price: "", persons: {}, priceType: "unit" },
           ]
         );
         const [persons, setPersons] = useState(initialData?.persons || []);
@@ -1230,7 +1251,7 @@
 
         const resetAllData = () => {
           setItems([
-            { id: 1, name: "", price: "", persons: [], priceType: "unit" },
+            { id: 1, name: "", price: "", persons: {}, priceType: "unit" },
           ]);
           setPersons([]);
           setNewPersonName("");
@@ -1249,7 +1270,7 @@
 
           const dataToSave = {
             items: [
-              { id: 1, name: "", price: "", persons: [], priceType: "unit" },
+              { id: 1, name: "", price: "", persons: {}, priceType: "unit" },
             ],
             persons: [],
             ongkir: "",
@@ -1285,7 +1306,7 @@
               id: Date.now() + Math.random() * 1000000,
               name: "",
               price: "",
-              persons: [],
+              persons: {},
               priceType: "unit",
             },
           ]);
@@ -1307,10 +1328,38 @@
           setItems(
             items.map((item) => {
               if (item.id === itemId) {
-                const persons = item.persons.includes(person)
-                  ? item.persons.filter((p) => p !== person)
-                  : [...item.persons, person];
-                return { ...item, persons };
+                const newPersons = { ...item.persons };
+
+                if (newPersons[person]) {
+                  // Remove if already selected
+                  delete newPersons[person];
+                } else {
+                  // Add with quantity 1 as a number
+                  newPersons[person] = 1;
+                }
+
+                return { ...item, persons: newPersons };
+              }
+              return item;
+            })
+          );
+        };
+
+        const setPersonQuantity = (itemId, person, quantity) => {
+          const numQty = Number(quantity);
+
+          setItems(
+            items.map((item) => {
+              if (item.id === itemId) {
+                const newPersons = { ...item.persons };
+
+                if (numQty <= 0 || isNaN(numQty)) {
+                  delete newPersons[person];
+                } else {
+                  newPersons[person] = numQty;
+                }
+
+                return { ...item, persons: newPersons };
               }
               return item;
             })
@@ -1327,10 +1376,11 @@
         const removePerson = (person) => {
           setPersons(persons.filter((p) => p !== person));
           setItems(
-            items.map((item) => ({
-              ...item,
-              persons: item.persons.filter((p) => p !== person),
-            }))
+            items.map((item) => {
+              const newPersons = { ...item.persons };
+              delete newPersons[person];
+              return { ...item, persons: newPersons };
+            })
           );
         };
 
@@ -1360,14 +1410,30 @@
         };
 
         const calculateSplit = () => {
-          // Calculate subtotal considering priceType
+          // Calculate subtotal considering priceType and quantities
           const subtotal = items.reduce((sum, item) => {
             const itemPrice = Number(item.price || 0);
+            const personsList = Object.keys(item.persons);
+
+            if (personsList.length === 0 || itemPrice === 0) {
+              return sum;
+            }
+
             if (item.priceType === "total") {
+              // Total price - add once regardless of quantities
               return sum + itemPrice;
             } else {
-              const quantity = item.persons.length || 1;
-              return sum + itemPrice * quantity;
+              // Per unit price - multiply by total quantities
+              const totalQuantity = Object.values(item.persons).reduce(
+                (q, qty) => q + (Number(qty) || 0),
+                0
+              );
+
+              if (totalQuantity === 0) {
+                return sum;
+              }
+
+              return sum + itemPrice * totalQuantity;
             }
           }, 0);
 
@@ -1391,19 +1457,41 @@
             personSubtotals[person] = 0;
           });
 
+          // Calculate each person's subtotal from items
           items.forEach((item) => {
             const itemPrice = Number(item.price || 0);
-            if (item.persons.length > 0 && itemPrice > 0) {
-              let pricePerPerson;
+            const personsList = Object.keys(item.persons);
 
-              if (item.priceType === "total") {
-                pricePerPerson = itemPrice / item.persons.length;
-              } else {
-                pricePerPerson = itemPrice;
+            if (personsList.length === 0 || itemPrice === 0) {
+              return;
+            }
+
+            if (item.priceType === "total") {
+              // Total price divided by total portions
+              const totalPortions = Object.values(item.persons).reduce(
+                (sum, qty) => sum + (Number(qty) || 0),
+                0
+              );
+
+              if (totalPortions === 0) {
+                return;
               }
 
-              item.persons.forEach((person) => {
-                personSubtotals[person] += pricePerPerson;
+              const pricePerPortion = itemPrice / totalPortions;
+
+              personsList.forEach((person) => {
+                const quantity = Number(item.persons[person] || 0);
+                if (quantity > 0) {
+                  personSubtotals[person] += pricePerPortion * quantity;
+                }
+              });
+            } else {
+              // Per unit price
+              personsList.forEach((person) => {
+                const quantity = Number(item.persons[person] || 0);
+                if (quantity > 0) {
+                  personSubtotals[person] += itemPrice * quantity;
+                }
               });
             }
           });
@@ -1413,8 +1501,7 @@
             0
           );
 
-          // Calculate total tax amount first (user input represents TOTAL tax to pay)
-          // Only voucher discount is proportionally distributed, shipping discount already reduced shipping fee
+          // Calculate total tax amount
           const subtotalAfterDiscount = subtotal - voucherDiscount;
 
           // Total tax amount based on user input
@@ -1502,9 +1589,20 @@
           netSharedAmount,
         } = calculateSplit();
 
-        const formatMoney = (amount) => amount.toLocaleString("id-ID");
-        const formatMoneySplit = (amount) =>
-          amount.toLocaleString("id-ID", { maximumFractionDigits: 0 });
+        const formatMoney = (amount) => {
+          const num = Number(amount);
+          if (isNaN(num) || !isFinite(num)) {
+            return "0";
+          }
+          return num.toLocaleString("id-ID");
+        };
+        const formatMoneySplit = (amount) => {
+          const num = Number(amount);
+          if (isNaN(num) || !isFinite(num)) {
+            return "0";
+          }
+          return num.toLocaleString("id-ID", { maximumFractionDigits: 0 });
+        };
         const roundToNearest100 = (amount) => Math.round(amount / 100) * 100;
 
         const toggleAccordion = (person) => {
@@ -1515,7 +1613,10 @@
         };
 
         const getPersonItems = (person) => {
-          return items.filter((item) => item.persons.includes(person));
+          return items.filter((item) => {
+            const qty = Number(item.persons[person] || 0);
+            return qty > 0;
+          });
         };
 
         const parseReceiptText = (text) => {
@@ -1609,7 +1710,7 @@
                     id: Date.now() + Math.random() * 1000000 + index * 100 + i,
                     name: itemName,
                     price: unitPrice.toString(),
-                    persons: [],
+                    persons: {},
                     priceType: "unit",
                   });
                 }
@@ -1639,7 +1740,7 @@
                   id: Date.now() + Math.random() * 1000000 + index * 100,
                   name: itemName,
                   price: priceStr,
-                  persons: [],
+                  persons: {},
                   priceType: "unit",
                 });
               }
@@ -2198,25 +2299,37 @@
                               </button>
                             </div>
                           </div>
-                          {item.persons.length > 0 && (
-                            <span className="text-xs text-gray-400 dark:text-gray-300 break-all">
-                              {item.priceType === "unit"
-                                ? `(${item.persons.length}x Rp ${formatMoney(
-                                    Number(item.price || 0)
-                                  )} = Rp ${formatMoney(
-                                    Number(item.price || 0) *
-                                      item.persons.length
-                                  )})`
-                                : `(Rp ${formatMoney(
-                                    Number(item.price || 0)
-                                  )} ÷ ${
-                                    item.persons.length
-                                  } = Rp ${formatMoney(
-                                    Number(item.price || 0) /
-                                      item.persons.length
-                                  )})`}
-                            </span>
-                          )}
+                          {Object.keys(item.persons).length > 0 &&
+                            item.price && (
+                              <span className="text-xs text-gray-400 dark:text-gray-300 break-all">
+                                {(() => {
+                                  const totalQty = Object.values(
+                                    item.persons
+                                  ).reduce(
+                                    (sum, qty) => sum + (Number(qty) || 0),
+                                    0
+                                  );
+                                  const price = Number(item.price || 0);
+
+                                  if (totalQty === 0 || price === 0) {
+                                    return "";
+                                  }
+
+                                  if (item.priceType === "unit") {
+                                    return `(${totalQty}x Rp ${formatMoney(
+                                      price
+                                    )} = Rp ${formatMoney(price * totalQty)})`;
+                                  } else {
+                                    const pricePerPortion = price / totalQty;
+                                    return `(Rp ${formatMoney(
+                                      price
+                                    )} ÷ ${totalQty} = Rp ${formatMoney(
+                                      pricePerPortion
+                                    )})`;
+                                  }
+                                })()}
+                              </span>
+                            )}
                         </div>
 
                         <div className="mt-4">
@@ -2226,20 +2339,122 @@
                                 {t.addPeopleFirst}
                               </span>
                             ) : (
-                              persons.map((person) => (
-                                <button
-                                  key={person}
-                                  onClick={() => togglePerson(item.id, person)}
-                                  className={`px-4 py-2 rounded-full text-sm font-medium transition border select-none ${
-                                    item.persons.includes(person)
-                                      ? "bg-black dark:bg-gray-600 text-white border-black dark:border-gray-600 shadow-sm"
-                                      : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700"
-                                  }`}
-                                  title={t.tooltipPersonSelect}
-                                >
-                                  {person}
-                                </button>
-                              ))
+                              persons.map((person) => {
+                                const quantity = item.persons[person] || 0;
+                                const isSelected = quantity > 0;
+
+                                const handleDecrease = (e) => {
+                                  e.stopPropagation();
+                                  if (quantity > 1) {
+                                    setPersonQuantity(
+                                      item.id,
+                                      person,
+                                      quantity - 1
+                                    );
+                                  }
+                                };
+
+                                const handleIncrease = (e) => {
+                                  e.stopPropagation();
+                                  setPersonQuantity(
+                                    item.id,
+                                    person,
+                                    quantity + 1
+                                  );
+                                };
+
+                                const handleQuantityChange = (e) => {
+                                  e.stopPropagation();
+                                  const value = e.target.value;
+                                  const newQty = parseInt(value);
+                                  if (!isNaN(newQty) && newQty >= 1) {
+                                    setPersonQuantity(item.id, person, newQty);
+                                  }
+                                };
+
+                                if (!isSelected) {
+                                  // Unselected chip - simple button
+                                  return (
+                                    <button
+                                      key={person}
+                                      onClick={() =>
+                                        togglePerson(item.id, person)
+                                      }
+                                      className="rounded-full text-sm font-medium transition border select-none flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2"
+                                      title={t.tooltipPersonSelect}
+                                    >
+                                      {person}
+                                    </button>
+                                  );
+                                }
+
+                                // Selected with quantity = 1: show ( name + )
+                                if (quantity === 1) {
+                                  return (
+                                    <div
+                                      key={person}
+                                      className="bg-black dark:bg-gray-600 text-white border border-black dark:border-gray-600 shadow-sm pl-3 pr-2 py-2 rounded-full flex items-center gap-3 text-sm font-medium"
+                                    >
+                                      <button
+                                        onClick={() =>
+                                          togglePerson(item.id, person)
+                                        }
+                                        className="hover:opacity-80 transition"
+                                        title="Click to remove"
+                                      >
+                                        {person}
+                                      </button>
+                                      <button
+                                        onClick={handleIncrease}
+                                        className="text-gray-300 hover:text-white transition font-bold w-6 h-6 flex items-center justify-center text-lg"
+                                        title="Increase quantity"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+                                  );
+                                }
+
+                                // Selected with quantity > 1: show ( name - [qty] + )
+                                return (
+                                  <div
+                                    key={person}
+                                    className="bg-black dark:bg-gray-600 text-white border border-black dark:border-gray-600 shadow-sm px-3 py-2 rounded-full flex items-center gap-2 text-sm font-medium"
+                                  >
+                                    <button
+                                      onClick={() =>
+                                        togglePerson(item.id, person)
+                                      }
+                                      className="hover:opacity-80 transition"
+                                      title="Click to remove"
+                                    >
+                                      {person}
+                                    </button>
+                                    <button
+                                      onClick={handleDecrease}
+                                      className="text-gray-300 hover:text-white transition font-bold w-5 h-5 flex items-center justify-center"
+                                      title="Decrease quantity"
+                                    >
+                                      −
+                                    </button>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      value={quantity}
+                                      onChange={handleQuantityChange}
+                                      className="w-12 px-0 py-0.5 text-center bg-white dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-500 rounded text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                      onClick={(e) => e.stopPropagation()}
+                                    />
+                                    <button
+                                      onClick={handleIncrease}
+                                      className="text-gray-300 hover:text-white transition font-bold w-5 h-5 flex items-center justify-center"
+                                      title="Increase quantity"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                );
+                              })
                             )}
                           </div>
                         </div>
@@ -2542,14 +2757,40 @@
                                               const itemPrice = Number(
                                                 item.price || 0
                                               );
+                                              const quantity = Number(
+                                                item.persons[person] || 0
+                                              );
+
+                                              if (
+                                                quantity === 0 ||
+                                                itemPrice === 0
+                                              ) {
+                                                return null;
+                                              }
+
                                               let displayPrice;
 
                                               if (item.priceType === "total") {
+                                                const totalPortions =
+                                                  Object.values(
+                                                    item.persons
+                                                  ).reduce(
+                                                    (sum, qty) =>
+                                                      sum + (Number(qty) || 0),
+                                                    0
+                                                  );
+
+                                                if (totalPortions === 0) {
+                                                  return null;
+                                                }
+
+                                                const pricePerPortion =
+                                                  itemPrice / totalPortions;
                                                 displayPrice =
-                                                  itemPrice /
-                                                  item.persons.length;
+                                                  pricePerPortion * quantity;
                                               } else {
-                                                displayPrice = itemPrice;
+                                                displayPrice =
+                                                  itemPrice * quantity;
                                               }
 
                                               return (
@@ -2561,20 +2802,29 @@
                                                     <div className="font-medium text-gray-700 dark:text-gray-200 truncate">
                                                       {item.name ||
                                                         t.itemPlaceholder}
+                                                      {quantity > 1 && (
+                                                        <span className="text-blue-600 dark:text-blue-400 font-bold ml-1">
+                                                          x{quantity}
+                                                        </span>
+                                                      )}
                                                     </div>
                                                     {item.priceType ===
-                                                      "total" &&
-                                                      item.persons.length >
-                                                        1 && (
-                                                        <div className="text-gray-400 dark:text-gray-500 text-xs">
-                                                          {t.priceTotal}: Rp{" "}
-                                                          {formatMoney(
-                                                            itemPrice
-                                                          )}{" "}
-                                                          ÷{" "}
-                                                          {item.persons.length}
-                                                        </div>
-                                                      )}
+                                                      "total" && (
+                                                      <div className="text-gray-400 dark:text-gray-500 text-xs">
+                                                        {t.priceTotal}: Rp{" "}
+                                                        {formatMoney(itemPrice)}{" "}
+                                                        ÷{" "}
+                                                        {Object.values(
+                                                          item.persons
+                                                        ).reduce(
+                                                          (sum, qty) =>
+                                                            sum +
+                                                            (Number(qty) || 0),
+                                                          0
+                                                        )}{" "}
+                                                        portions
+                                                      </div>
+                                                    )}
                                                   </div>
                                                   <span className="font-mono text-gray-600 dark:text-gray-300 whitespace-nowrap flex-shrink-0">
                                                     Rp{" "}
