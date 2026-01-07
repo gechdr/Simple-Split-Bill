@@ -1705,15 +1705,14 @@
               if (itemName.length > 2 && totalPrice.length >= 3) {
                 const unitPrice = Math.round(parseInt(totalPrice) / quantity);
 
-                for (let i = 0; i < quantity; i++) {
-                  detectedItems.push({
-                    id: Date.now() + Math.random() * 1000000 + index * 100 + i,
-                    name: itemName,
-                    price: unitPrice.toString(),
-                    persons: {},
-                    priceType: "unit",
-                  });
-                }
+                // Create single item with unit price (users will add quantities manually)
+                detectedItems.push({
+                  id: Date.now() + Math.random() * 1000000 + index * 100,
+                  name: itemName,
+                  price: unitPrice.toString(),
+                  persons: {},
+                  priceType: "unit",
+                });
               }
               return;
             }
