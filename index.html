@@ -188,6 +188,14 @@
           tooltipRounding: "Round each person's bill to nearest 100",
           rounded: "Rounded",
           notRounded: "Not Rounded",
+          // Validation errors
+          errorNameRequired: "Account holder name is required",
+          errorNameTooShort: "Must be at least 2 characters",
+          errorNumberRequired: "Account number is required",
+          errorNumberTooShort: "Must be at least 3 digits",
+          errorNumberInvalid: "Must contain only numbers",
+          errorVendorRequired: "Bank/E-Wallet name is required",
+          errorVendorTooShort: "Must be at least 2 characters",
         },
         id: {
           title: "Patungan",
@@ -308,6 +316,14 @@
           tooltipRounding: "Bulatkan tagihan setiap orang ke 100 terdekat",
           rounded: "Dibulatkan",
           notRounded: "Tidak Dibulatkan",
+          // Validation errors
+          errorNameRequired: "Nama pemilik rekening wajib diisi",
+          errorNameTooShort: "Minimal 2 karakter",
+          errorNumberRequired: "Nomor rekening wajib diisi",
+          errorNumberTooShort: "Minimal 3 digit",
+          errorNumberInvalid: "Hanya boleh berisi angka",
+          errorVendorRequired: "Nama Bank/E-Wallet wajib diisi",
+          errorVendorTooShort: "Minimal 2 karakter",
         },
       };
 
@@ -700,6 +716,7 @@
       }) => {
         const [isOpen, setIsOpen] = useState(false);
         const [showCustomModal, setShowCustomModal] = useState(false);
+        const [errors, setErrors] = useState({});
         const dropdownRef = useRef(null);
 
         useEffect(() => {
@@ -741,15 +758,70 @@
           }
         };
 
+        const validateField = (field, value) => {
+          const newErrors = { ...errors };
+          
+          if (field === 'name') {
+            if (!value.trim()) {
+              newErrors.name = t.errorNameRequired;
+            } else if (value.trim().length < 2) {
+              newErrors.name = t.errorNameTooShort;
+            } else {
+              delete newErrors.name;
+            }
+          }
+          
+          if (field === 'number') {
+            if (!value.trim()) {
+              newErrors.number = t.errorNumberRequired;
+            } else if (value.trim().length < 3) {
+              newErrors.number = t.errorNumberTooShort;
+            } else if (!/^[0-9]+$/.test(value.trim())) {
+              newErrors.number = t.errorNumberInvalid;
+            } else {
+              delete newErrors.number;
+            }
+          }
+          
+          if (field === 'vendor') {
+            if (!value.trim()) {
+              newErrors.vendor = t.errorVendorRequired;
+            } else if (value.trim().length < 2) {
+              newErrors.vendor = t.errorVendorTooShort;
+            } else {
+              delete newErrors.vendor;
+            }
+          }
+          
+          setErrors(newErrors);
+        };
+
         const handleSaveCustom = () => {
-          if (customName.trim() && customNumber.trim() && customVendor.trim()) {
+          const nameError = !customName.trim() ? t.errorNameRequired : 
+                           customName.trim().length < 2 ? t.errorNameTooShort : null;
+          const numberError = !customNumber.trim() ? t.errorNumberRequired :
+                             customNumber.trim().length < 3 ? t.errorNumberTooShort :
+                             !/^[0-9]+$/.test(customNumber.trim()) ? t.errorNumberInvalid : null;
+          const vendorError = !customVendor.trim() ? t.errorVendorRequired :
+                             customVendor.trim().length < 2 ? t.errorVendorTooShort : null;
+          
+          const newErrors = {};
+          if (nameError) newErrors.name = nameError;
+          if (numberError) newErrors.number = numberError;
+          if (vendorError) newErrors.vendor = vendorError;
+          
+          setErrors(newErrors);
+          
+          if (Object.keys(newErrors).length === 0) {
             onSaveCustomAccount();
             setShowCustomModal(false);
+            setErrors({});
           }
         };
 
         const handleCancelCustom = () => {
           setShowCustomModal(false);
+          setErrors({});
           onCustomNameChange("");
           onCustomNumberChange("");
           onCustomVendorChange("");
@@ -850,59 +922,89 @@
 
             {showCustomModal && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4 animate-fade-in">
-                <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-2xl animate-slide-down">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl animate-slide-down">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
                     {t.addNewAccount}
                   </h3>
 
                   <div className="space-y-4 mb-6">
                     <div>
-                      <label className="block text-xs font-medium text-gray-500 uppercase mb-1">
+                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-300 uppercase mb-1">
                         {t.accountHolderName}
                       </label>
                       <input
                         type="text"
                         value={customName}
-                        onChange={(e) => onCustomNameChange(e.target.value)}
+                        onChange={(e) => {
+                          onCustomNameChange(e.target.value);
+                          validateField('name', e.target.value);
+                        }}
                         placeholder={t.accountHolderPlaceholder}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none bg-white text-base sm:text-sm"
+                        className={`w-full px-4 py-2.5 border rounded-lg focus:ring-1 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-base sm:text-sm ${
+                          errors.name 
+                            ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400'
+                            : 'border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-500 focus:ring-gray-900 dark:focus:ring-gray-500'
+                        }`}
                         title={t.tooltipAccountName}
                         autoFocus
                       />
+                      {errors.name && (
+                        <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.name}</p>
+                      )}
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-500 uppercase mb-1">
+                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-300 uppercase mb-1">
                         {t.accountNumber}
                       </label>
                       <input
                         type="text"
                         inputMode="numeric"
                         value={customNumber}
-                        onChange={(e) => onCustomNumberChange(e.target.value)}
+                        onChange={(e) => {
+                          onCustomNumberChange(e.target.value);
+                          validateField('number', e.target.value);
+                        }}
                         placeholder={t.accountNumberPlaceholder}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none bg-white text-base sm:text-sm font-mono"
+                        className={`w-full px-4 py-2.5 border rounded-lg focus:ring-1 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-base sm:text-sm font-mono ${
+                          errors.number 
+                            ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400'
+                            : 'border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-500 focus:ring-gray-900 dark:focus:ring-gray-500'
+                        }`}
                         title={t.tooltipAccountNumber}
                       />
+                      {errors.number && (
+                        <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.number}</p>
+                      )}
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-gray-500 uppercase mb-1">
+                      <label className="block text-xs font-medium text-gray-500 dark:text-gray-300 uppercase mb-1">
                         {t.bankEwallet}
                       </label>
                       <input
                         type="text"
                         value={customVendor}
-                        onChange={(e) => onCustomVendorChange(e.target.value)}
+                        onChange={(e) => {
+                          onCustomVendorChange(e.target.value);
+                          validateField('vendor', e.target.value);
+                        }}
                         placeholder={t.bankEwalletPlaceholder}
-                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-1 focus:ring-gray-900 focus:border-gray-900 focus:outline-none bg-white text-base sm:text-sm"
+                        className={`w-full px-4 py-2.5 border rounded-lg focus:ring-1 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-base sm:text-sm ${
+                          errors.vendor 
+                            ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400'
+                            : 'border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-500 focus:ring-gray-900 dark:focus:ring-gray-500'
+                        }`}
                         title={t.tooltipBankName}
                       />
+                      {errors.vendor && (
+                        <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.vendor}</p>
+                      )}
                     </div>
                   </div>
 
                   <div className="flex gap-3">
                     <button
                       onClick={handleCancelCustom}
-                      className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium"
+                      className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition font-medium"
                     >
                       {t.cancel}
                     </button>
@@ -913,7 +1015,7 @@
                         !customNumber.trim() ||
                         !customVendor.trim()
                       }
-                      className="flex-1 px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-black transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 px-4 py-2.5 bg-gray-900 dark:bg-gray-600 text-white rounded-lg hover:bg-black dark:hover:bg-gray-500 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {t.save}
                     </button>
@@ -939,13 +1041,13 @@
 
         return (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4 animate-fade-in">
-            <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-2xl animate-slide-down">
-              <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
-              <p className="text-gray-600 mb-6">{message}</p>
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-slide-down">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
               <div className="flex gap-3">
                 <button
                   onClick={onCancel}
-                  className="flex-1 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium"
+                  className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition font-medium"
                 >
                   {cancelText}
                 </button>
@@ -1093,7 +1195,7 @@
         const [roundTo100, setRoundTo100] = useState(
           initialData?.roundTo100 || false
         );
-        const [showCalculator, setShowCalculator] = useState(false);
+        const [showCalculator, setShowCalculator] = useState(true);
         const [calcDisplay, setCalcDisplay] = useState("0");
         const [calcPrevValue, setCalcPrevValue] = useState(null);
         const [calcOperation, setCalcOperation] = useState(null);
@@ -1101,7 +1203,7 @@
         const [currentTime, setCurrentTime] = useState(new Date());
         const [clockPos, setClockPos] = useState({ x: 24, y: 80 });
         const [calcPos, setCalcPos] = useState({
-          x: window.innerWidth - 280,
+          x: window.innerWidth - 320,
           y: 80,
         });
         const [isDraggingWidget, setIsDraggingWidget] = useState(null);
@@ -1199,38 +1301,37 @@
         ]);
 
         const saveCustomAccount = () => {
-          if (
-            customAccountName.trim() &&
-            customAccountNumber.trim() &&
-            customAccountVendor.trim()
-          ) {
-            const newAccount = {
-              name: customAccountName.trim(),
-              number: customAccountNumber.trim(),
-              vendor: customAccountVendor.trim(),
-            };
+          const trimmedName = customAccountName.trim();
+          const trimmedNumber = customAccountNumber.trim();
+          const trimmedVendor = customAccountVendor.trim();
 
-            const accountExists = bankAccounts.some(
-              (acc) =>
-                acc.number === newAccount.number && acc.number !== "CUSTOM"
-            );
+          const newAccount = {
+            name: trimmedName,
+            number: trimmedNumber,
+            vendor: trimmedVendor,
+          };
 
-            if (!accountExists) {
-              const updatedAccounts = [...bankAccounts, newAccount];
-              setBankAccounts(updatedAccounts);
-              setSelectedAccount(newAccount.number);
+          const accountExists = bankAccounts.some(
+            (acc) =>
+              acc.number === newAccount.number && acc.number !== "CUSTOM"
+          );
 
-              setCustomAccountName("");
-              setCustomAccountNumber("");
-              setCustomAccountVendor("");
-
-              setCaptureStatus(t.accountSaved);
-              setTimeout(() => setCaptureStatus(""), 2000);
-            } else {
-              setCaptureStatus(t.accountExists);
-              setTimeout(() => setCaptureStatus(""), 2000);
-            }
+          if (accountExists) {
+            setCaptureStatus(t.accountExists);
+            setTimeout(() => setCaptureStatus(""), 2000);
+            return;
           }
+
+          const updatedAccounts = [...bankAccounts, newAccount];
+          setBankAccounts(updatedAccounts);
+          setSelectedAccount(newAccount.number);
+
+          setCustomAccountName("");
+          setCustomAccountNumber("");
+          setCustomAccountVendor("");
+
+          setCaptureStatus(t.accountSaved);
+          setTimeout(() => setCaptureStatus(""), 2000);
         };
 
         const deleteBankAccount = (accountNumber) => {
@@ -3080,7 +3181,7 @@
                       });
                     }}
                     onDoubleClick={() =>
-                      setCalcPos({ x: window.innerWidth - 280, y: 80 })
+                      setCalcPos({ x: window.innerWidth - 320, y: 80 })
                     }
                   >
                     <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
