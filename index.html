@@ -141,7 +141,7 @@
           itemsOrdered: "Items Ordered",
           noItems: "No items",
           download: "Download",
-          copyImage: "Copy Image",
+          copyImage: "Copy to Clipboard",
           processing: "Processing...",
           downloaded: "Downloaded successfully!",
           copied: "Copied successfully!",
@@ -196,6 +196,24 @@
           errorNumberInvalid: "Must contain only numbers",
           errorVendorRequired: "Bank/E-Wallet name is required",
           errorVendorTooShort: "Must be at least 2 characters",
+          tooltipCalculator: "Toggle calculator widget",
+          tooltipClock: "Toggle clock widget",
+          tooltipPaymentTracker: "Toggle payment tracker",
+          whatsNew: "What's New",
+          whatsNewClose: "Got it!",
+          whatsNewNew: "New",
+          whatsNewImproved: "Improved",
+          whatsNewRemoved: "Removed",
+          authorLabel: "Author",
+          authorContact: "MS Teams",
+          authorReach: "Have suggestions or found a bug? Don't hesitate to reach out!",
+          widgetCalculator: "Calculator",
+          widgetClock: "Clock",
+          widgetPaymentTracker: "Payment Tracker",
+          paymentUnpaid: "Unpaid",
+          paymentPaid: "Paid",
+          paymentAllSettled: "All settled up! 🎉",
+          paymentNoPeople: "No people added yet.",
         },
         id: {
           title: "Patungan",
@@ -265,7 +283,7 @@
           itemsOrdered: "Barang yang Dipesan",
           noItems: "Tidak ada barang",
           download: "Unduh",
-          copyImage: "Salin Gambar",
+          copyImage: "Salin ke Clipboard",
           processing: "Memproses...",
           downloaded: "Berhasil diunduh!",
           copied: "Berhasil disalin!",
@@ -324,6 +342,24 @@
           errorNumberInvalid: "Hanya boleh berisi angka",
           errorVendorRequired: "Nama Bank/E-Wallet wajib diisi",
           errorVendorTooShort: "Minimal 2 karakter",
+          tooltipCalculator: "Toggle widget kalkulator",
+          tooltipClock: "Toggle widget jam",
+          tooltipPaymentTracker: "Toggle pelacak pembayaran",
+          whatsNew: "Yang Baru",
+          whatsNewClose: "Mengerti!",
+          whatsNewNew: "Baru",
+          whatsNewImproved: "Peningkatan",
+          whatsNewRemoved: "Dihapus",
+          authorLabel: "Pembuat",
+          authorContact: "MS Teams",
+          authorReach: "Ada saran atau menemukan bug? Jangan ragu untuk menghubungi!",
+          widgetCalculator: "Kalkulator",
+          widgetClock: "Jam",
+          widgetPaymentTracker: "Pelacak Pembayaran",
+          paymentUnpaid: "Belum Bayar",
+          paymentPaid: "Sudah Bayar",
+          paymentAllSettled: "Semua sudah lunas! 🎉",
+          paymentNoPeople: "Belum ada orang yang ditambahkan.",
         },
       };
 
@@ -637,6 +673,21 @@
             strokeLinejoin="round"
             strokeWidth={2}
             d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+          />
+        </svg>
+      );
+      const ListChecks = ({ className }) => (
+        <svg
+          className={className || "w-6 h-6"}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
           />
         </svg>
       );
@@ -1065,8 +1116,36 @@
 
       // --- MAIN APP ---
       function SplitBill() {
-        const appVersion = "v2.6.0";
+        const appVersion = "v2.7.0";
         const STORAGE_KEY = "splitBillData";
+        const VERSION_KEY = "splitBillSeenVersion";
+
+        const changelog = {
+          "v2.7.0": {
+            en: {
+              new: [
+                "Payment Tracker widget — mark each person as paid/unpaid",
+                "What's New modal — shows once per version on launch",
+              ],
+              improved: [
+                "Download and Copy buttons now show status independently",
+                "Language support for Payment Tracker widget",
+              ],
+              removed: [],
+            },
+            id: {
+              new: [
+                "Widget Pelacak Pembayaran — tandai setiap orang sebagai sudah/belum bayar",
+                "Modal Yang Baru — tampil sekali per versi saat dibuka",
+              ],
+              improved: [
+                "Tombol Unduh dan Salin kini menampilkan status secara mandiri",
+                "Dukungan bahasa untuk widget Pelacak Pembayaran",
+              ],
+              removed: [],
+            },
+          },
+        };
         const LANGUAGE_KEY = "splitBillLanguage";
 
         // Load language from localStorage or default to English
@@ -1121,6 +1200,10 @@
                 });
               }
               
+              if (!parsed.paymentStatus || typeof parsed.paymentStatus !== "object") {
+                parsed.paymentStatus = {};
+              }
+
               return parsed;
             }
           } catch (error) {
@@ -1172,14 +1255,18 @@
 
         const [isCapturing, setIsCapturing] = useState(false);
         const [captureStatus, setCaptureStatus] = useState("");
+        const [downloadStatus, setDownloadStatus] = useState("");
         const summaryRef = useRef(null);
         const fileInputRef = useRef(null);
+        const paymentTrackerRef = useRef(null);
+        const [paymentCopyStatus, setPaymentCopyStatus] = useState("");
 
         const [isScanning, setIsScanning] = useState(false);
         const [scanProgress, setScanProgress] = useState(0);
         const [isDragging, setIsDragging] = useState(false);
 
         const [showResetModal, setShowResetModal] = useState(false);
+        const [showWhatsNew, setShowWhatsNew] = useState(false);
         const [openAccordions, setOpenAccordions] = useState({});
         const [showOCR, setShowOCR] = useState(false);
         const [darkMode, setDarkMode] = useState(() => {
@@ -1206,6 +1293,14 @@
           x: window.innerWidth - 320,
           y: 80,
         });
+        const [showPaymentTracker, setShowPaymentTracker] = useState(true);
+        const [paymentTrackerPos, setPaymentTrackerPos] = useState({
+          x: window.innerWidth - 320,
+          y: 620,
+        });
+        const [paymentStatus, setPaymentStatus] = useState(
+          initialData?.paymentStatus || {}
+        );
         const [isDraggingWidget, setIsDraggingWidget] = useState(null);
         const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
@@ -1223,6 +1318,11 @@
               });
             } else if (isDraggingWidget === "calc") {
               setCalcPos({
+                x: e.clientX - dragOffset.x,
+                y: e.clientY - dragOffset.y,
+              });
+            } else if (isDraggingWidget === "payment") {
+              setPaymentTrackerPos({
                 x: e.clientX - dragOffset.x,
                 y: e.clientY - dragOffset.y,
               });
@@ -1274,6 +1374,7 @@
             customAccountNumber,
             customAccountVendor,
             roundTo100,
+            paymentStatus,
             lastSaved: new Date().toISOString(),
           };
 
@@ -1298,7 +1399,21 @@
           customAccountNumber,
           customAccountVendor,
           roundTo100,
+          paymentStatus,
         ]);
+
+        // Show "What's New" modal once per version
+        React.useEffect(() => {
+          const seenVersion = localStorage.getItem(VERSION_KEY);
+          if (seenVersion !== appVersion && changelog[appVersion]) {
+            setShowWhatsNew(true);
+          }
+        }, []);
+
+        const dismissWhatsNew = () => {
+          localStorage.setItem(VERSION_KEY, appVersion);
+          setShowWhatsNew(false);
+        };
 
         const saveCustomAccount = () => {
           const trimmedName = customAccountName.trim();
@@ -1368,6 +1483,7 @@
           setCustomAccountNumber("");
           setCustomAccountVendor("");
           setRoundTo100(false);
+          setPaymentStatus({});
 
           const dataToSave = {
             items: [
@@ -1386,6 +1502,7 @@
             customAccountNumber: "",
             customAccountVendor: "",
             roundTo100: false,
+            paymentStatus: {},
             lastSaved: new Date().toISOString(),
           };
 
@@ -1468,9 +1585,11 @@
         };
 
         const addPerson = () => {
-          if (newPersonName.trim()) {
-            setPersons([...persons, newPersonName.trim()]);
+          const trimmed = newPersonName.trim();
+          if (trimmed) {
+            setPersons([...persons, trimmed]);
             setNewPersonName("");
+            setPaymentStatus((prev) => ({ ...prev, [trimmed]: false }));
           }
         };
 
@@ -1483,6 +1602,11 @@
               return { ...item, persons: newPersons };
             })
           );
+          setPaymentStatus((prev) => {
+            const next = { ...prev };
+            delete next[person];
+            return next;
+          });
         };
 
         const handleItemDragStart = (e, index) => {
@@ -1976,7 +2100,11 @@
         const handleCapture = async (actionType) => {
           if (!summaryRef.current) return;
           setIsCapturing(true);
-          setCaptureStatus(t.processing);
+          if (actionType === "download") {
+            setDownloadStatus(t.processing);
+          } else {
+            setCaptureStatus(t.processing);
+          }
 
           try {
             await document.fonts.ready;
@@ -1999,7 +2127,7 @@
               link.download = `split-bill-${Date.now()}.png`;
               link.href = dataUrl;
               link.click();
-              setCaptureStatus(t.downloaded);
+              setDownloadStatus(t.downloaded);
             } else {
               const response = await fetch(dataUrl);
               const blob = await response.blob();
@@ -2016,13 +2144,50 @@
             }
           } catch (error) {
             console.error(error);
-            setCaptureStatus(t.failedToProcess);
+            if (actionType === "download") {
+              setDownloadStatus(t.failedToProcess);
+            } else {
+              setCaptureStatus(t.failedToProcess);
+            }
           }
 
           setTimeout(() => {
             setCaptureStatus("");
+            setDownloadStatus("");
             setIsCapturing(false);
           }, 2000);
+        };
+
+        const handlePaymentCopy = async () => {
+          if (!paymentTrackerRef.current) return;
+          setPaymentCopyStatus(t.processing);
+
+          try {
+            await document.fonts.ready;
+            const el = paymentTrackerRef.current;
+            const dataUrl = await domtoimage.toPng(el, {
+              quality: 1,
+              bgcolor: darkMode ? "#1f2937" : "#ffffff",
+              style: {
+                transform: "scale(3)",
+                transformOrigin: "top left",
+                width: el.offsetWidth + "px",
+                height: el.offsetHeight + "px",
+              },
+              width: el.offsetWidth * 3,
+              height: el.offsetHeight * 3,
+            });
+
+            const response = await fetch(dataUrl);
+            const blob = await response.blob();
+            await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+            setPaymentCopyStatus(t.copied);
+          } catch (err) {
+            console.error(err);
+            setPaymentCopyStatus(t.failedToCopy);
+          }
+
+          setTimeout(() => setPaymentCopyStatus(""), 2000);
         };
 
         const formatCalcDisplay = (value) => {
@@ -2177,9 +2342,16 @@
                         <button
                           onClick={() => setShowCalculator(!showCalculator)}
                           className="hidden md:flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
-                          title="Toggle calculator"
+                          title={t.tooltipCalculator}
                         >
                           <Calculator className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => setShowPaymentTracker(!showPaymentTracker)}
+                          className="hidden md:flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                          title={t.tooltipPaymentTracker}
+                        >
+                          <ListChecks className="w-5 h-5" />
                         </button>
                         <button
                           onClick={() => setShowOCR(!showOCR)}
@@ -3083,51 +3255,47 @@
                     <div className="flex flex-col sm:flex-row gap-4">
                       <button
                         onClick={() => handleCapture("download")}
-                        disabled={isCapturing}
+                        disabled={!!downloadStatus}
                         className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                         title={t.tooltipDownload}
                       >
                         <Download className="w-5 h-5" />
-                        {t.download}
+                        {downloadStatus || t.download}
                       </button>
                       <button
                         onClick={() => handleCapture("copy")}
-                        disabled={isCapturing}
+                        disabled={!!captureStatus}
                         className="flex-1 bg-gray-900 dark:bg-gray-700 text-white py-3 rounded-lg hover:bg-black dark:hover:bg-gray-600 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-gray-200 dark:shadow-gray-900"
                         title={t.tooltipCopy}
                       >
                         <Copy className="w-5 h-5" />
-                        {t.copyImage}
+                        {captureStatus || t.copyImage}
                       </button>
                     </div>
                   </>
                 )}
 
-                {/* Status Notification */}
-                {(captureStatus || isScanning) && (
+                {/* Status Notification - OCR scanning only */}
+                {isScanning && (
                   <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-xs sm:max-w-sm">
                     <div className="px-4 py-3 rounded-lg shadow-xl font-medium border text-sm sm:text-base bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white animate-fade-in">
                       <div className="flex items-center justify-center gap-2">
-                        {(captureStatus.includes("Processing") ||
-                          captureStatus.includes("Memproses") ||
-                          isScanning) && (
-                          <svg
-                            className="w-5 h-5 animate-spin"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                            />
-                          </svg>
-                        )}
+                        <svg
+                          className="w-5 h-5 animate-spin"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                          />
+                        </svg>
                         <span>{captureStatus}</span>
                       </div>
-                      {isScanning && scanProgress > 0 && (
+                      {scanProgress > 0 && (
                         <div className="mt-2">
                           <div className="w-full bg-gray-700 dark:bg-gray-300 rounded-full h-2">
                             <div
@@ -3140,6 +3308,50 @@
                           </div>
                         </div>
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* What's New Modal */}
+                {showWhatsNew && changelog[appVersion] && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4 animate-fade-in">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-slide-down">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="text-xl">🎉</span>
+                        <div className="flex items-baseline gap-2">
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t.whatsNew}</h3>
+                          <span className="text-lg font-bold text-gray-400 dark:text-gray-500">{appVersion}</span>
+                        </div>
+                      </div>
+                      <div className="space-y-4 mb-6">
+                        {[
+                          { key: "new", label: t.whatsNewNew },
+                          { key: "improved", label: t.whatsNewImproved },
+                          { key: "removed", label: t.whatsNewRemoved },
+                        ].map(({ key, label }) => {
+                          const items = changelog[appVersion][language][key];
+                          if (!items || items.length === 0) return null;
+                          return (
+                            <div key={key}>
+                              <p className="text-xs font-bold uppercase tracking-wide mb-1.5 text-gray-400 dark:text-gray-500">{label}</p>
+                              <ul className="space-y-1.5">
+                                {items.map((item, i) => (
+                                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-gray-400 dark:bg-gray-500" />
+                                    <span>{item}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <button
+                        onClick={dismissWhatsNew}
+                        className="w-full px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:bg-gray-700 dark:hover:bg-gray-300 transition font-medium"
+                      >
+                        {t.whatsNewClose}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -3185,7 +3397,7 @@
                     }
                   >
                     <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                      Calculator
+                      {t.widgetCalculator}
                     </span>
                     <button
                       onClick={() => setShowCalculator(false)}
@@ -3287,6 +3499,139 @@
                       className="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 rounded-lg py-3 font-semibold transition"
                     >
                       .
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Floating Payment Tracker - Desktop Only */}
+            {showPaymentTracker && (
+              <div
+                className="hidden md:block fixed z-40 animate-fade-in"
+                style={{ left: `${paymentTrackerPos.x}px`, top: `${paymentTrackerPos.y}px` }}
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-64">
+                  <div ref={paymentTrackerRef}>
+                  {/* Drag Handle / Header */}
+                  <div
+                    className="flex items-center justify-between px-4 py-3 cursor-move border-b border-gray-200 dark:border-gray-700 rounded-t-xl"
+                    onMouseDown={(e) => {
+                      setIsDraggingWidget("payment");
+                      setDragOffset({
+                        x: e.clientX - paymentTrackerPos.x,
+                        y: e.clientY - paymentTrackerPos.y,
+                      });
+                    }}
+                    onDoubleClick={() =>
+                      setPaymentTrackerPos({
+                        x: window.innerWidth - 320,
+                        y: 620,
+                      })
+                    }
+                  >
+                    <span className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                      <ListChecks className="w-4 h-4" />
+                      {t.widgetPaymentTracker}
+                    </span>
+                    <button
+                      onClick={() => setShowPaymentTracker(false)}
+                      className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition text-xl leading-none"
+                    >
+                      ×
+                    </button>
+                  </div>
+
+                  {/* Body */}
+                  <div className="p-3 max-h-80 overflow-y-auto">
+                    {persons.length === 0 ? (
+                      <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">
+                        {t.paymentNoPeople}
+                      </p>
+                    ) : (() => {
+                      const splitResult = calculateSplit();
+                      const unpaid = persons.filter((p) => !paymentStatus[p]);
+                      const paid = persons.filter((p) => paymentStatus[p]);
+
+                      const togglePayment = (person) => {
+                        setPaymentStatus((prev) => ({
+                          ...prev,
+                          [person]: !prev[person],
+                        }));
+                      };
+
+                      const PersonRow = ({ person, isPaid }) => {
+                        const amount = splitResult.personTotals[person] || 0;
+                        return (
+                          <button
+                            key={person}
+                            onClick={() => togglePayment(person)}
+                            className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-700"
+                          >
+                            <span
+                              className={`text-sm font-medium truncate ${
+                                isPaid
+                                  ? "text-gray-400 dark:text-gray-500 line-through"
+                                  : "text-gray-800 dark:text-gray-200"
+                              }`}
+                            >
+                              {person}
+                            </span>
+                            <span className="text-xs font-mono flex-shrink-0 text-gray-500 dark:text-gray-400">
+                              Rp {formatMoneySplit(amount)}
+                            </span>
+                          </button>
+                        );
+                      };
+
+                      return (
+                        <>
+                          {unpaid.length > 0 && (
+                            <div className="mb-2">
+                              <div className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 px-2 mb-1">
+                                {t.paymentUnpaid} ({unpaid.length})
+                              </div>
+                              {unpaid.map((person) => (
+                                <PersonRow key={person} person={person} isPaid={false} />
+                              ))}
+                            </div>
+                          )}
+
+                          {unpaid.length > 0 && paid.length > 0 && (
+                            <div className="border-t border-gray-100 dark:border-gray-700 my-2" />
+                          )}
+
+                          {paid.length > 0 && (
+                            <div>
+                              <div className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 px-2 mb-1">
+                                {t.paymentPaid} ({paid.length})
+                              </div>
+                              {paid.map((person) => (
+                                <PersonRow key={person} person={person} isPaid={true} />
+                              ))}
+                            </div>
+                          )}
+
+                          {paid.length > 0 && unpaid.length === 0 && (
+                            <div className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500 font-medium py-1">
+                              {t.paymentAllSettled}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                  </div>
+                  {/* Copy Button */}
+                  <div className="px-3 pb-3">
+                    <button
+                      onClick={handlePaymentCopy}
+                      disabled={!!paymentCopyStatus}
+                      className="w-full bg-gray-900 dark:bg-gray-700 text-white py-2 rounded-lg hover:bg-black dark:hover:bg-gray-600 transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+                      title={t.tooltipCopy}
+                    >
+                      <Copy className="w-4 h-4" />
+                      {paymentCopyStatus || t.copyImage}
                     </button>
                   </div>
                 </div>
@@ -3453,6 +3798,16 @@
                 </div>
               </div>
             </div>
+
+            {/* Author Credit - Bottom Left */}
+            <div className="fixed bottom-4 left-4 z-30 hidden md:block">
+              <div className="text-xs text-gray-400 dark:text-gray-600 space-y-0.5">
+                <p className="font-medium text-gray-500 dark:text-gray-500">{t.authorLabel}: Geovann Chandra</p>
+                <p>{t.authorContact}: Chandra, Geovann</p>
+                <p>{t.authorReach}</p>
+              </div>
+            </div>
+
           </div>
         );
       }
