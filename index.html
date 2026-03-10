@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="bg-gray-200 dark:bg-gray-900">
   <head>
     <meta charset="UTF-8" />
@@ -206,7 +206,8 @@
           whatsNewRemoved: "Removed",
           authorLabel: "Author",
           authorContact: "MS Teams",
-          authorReach: "Have suggestions or found a bug? Don't hesitate to reach out!",
+          authorReach:
+            "Have suggestions or found a bug? Don't hesitate to reach out!",
           widgetCalculator: "Calculator",
           widgetClock: "Clock",
           widgetPaymentTracker: "Payment Tracker",
@@ -352,7 +353,8 @@
           whatsNewRemoved: "Dihapus",
           authorLabel: "Pembuat",
           authorContact: "MS Teams",
-          authorReach: "Ada saran atau menemukan bug? Jangan ragu untuk menghubungi!",
+          authorReach:
+            "Ada saran atau menemukan bug? Jangan ragu untuk menghubungi!",
           widgetCalculator: "Kalkulator",
           widgetClock: "Jam",
           widgetPaymentTracker: "Pelacak Pembayaran",
@@ -789,7 +791,7 @@
 
         const customOption = options.find((opt) => opt.number === "CUSTOM");
         const regularAccounts = options.filter(
-          (opt) => opt.number !== "CUSTOM"
+          (opt) => opt.number !== "CUSTOM",
         );
 
         const handleSelect = (accountNumber) => {
@@ -811,8 +813,8 @@
 
         const validateField = (field, value) => {
           const newErrors = { ...errors };
-          
-          if (field === 'name') {
+
+          if (field === "name") {
             if (!value.trim()) {
               newErrors.name = t.errorNameRequired;
             } else if (value.trim().length < 2) {
@@ -821,8 +823,8 @@
               delete newErrors.name;
             }
           }
-          
-          if (field === 'number') {
+
+          if (field === "number") {
             if (!value.trim()) {
               newErrors.number = t.errorNumberRequired;
             } else if (value.trim().length < 3) {
@@ -833,8 +835,8 @@
               delete newErrors.number;
             }
           }
-          
-          if (field === 'vendor') {
+
+          if (field === "vendor") {
             if (!value.trim()) {
               newErrors.vendor = t.errorVendorRequired;
             } else if (value.trim().length < 2) {
@@ -843,26 +845,36 @@
               delete newErrors.vendor;
             }
           }
-          
+
           setErrors(newErrors);
         };
 
         const handleSaveCustom = () => {
-          const nameError = !customName.trim() ? t.errorNameRequired : 
-                           customName.trim().length < 2 ? t.errorNameTooShort : null;
-          const numberError = !customNumber.trim() ? t.errorNumberRequired :
-                             customNumber.trim().length < 3 ? t.errorNumberTooShort :
-                             !/^[0-9]+$/.test(customNumber.trim()) ? t.errorNumberInvalid : null;
-          const vendorError = !customVendor.trim() ? t.errorVendorRequired :
-                             customVendor.trim().length < 2 ? t.errorVendorTooShort : null;
-          
+          const nameError = !customName.trim()
+            ? t.errorNameRequired
+            : customName.trim().length < 2
+              ? t.errorNameTooShort
+              : null;
+          const numberError = !customNumber.trim()
+            ? t.errorNumberRequired
+            : customNumber.trim().length < 3
+              ? t.errorNumberTooShort
+              : !/^[0-9]+$/.test(customNumber.trim())
+                ? t.errorNumberInvalid
+                : null;
+          const vendorError = !customVendor.trim()
+            ? t.errorVendorRequired
+            : customVendor.trim().length < 2
+              ? t.errorVendorTooShort
+              : null;
+
           const newErrors = {};
           if (nameError) newErrors.name = nameError;
           if (numberError) newErrors.number = numberError;
           if (vendorError) newErrors.vendor = vendorError;
-          
+
           setErrors(newErrors);
-          
+
           if (Object.keys(newErrors).length === 0) {
             onSaveCustomAccount();
             setShowCustomModal(false);
@@ -988,19 +1000,21 @@
                         value={customName}
                         onChange={(e) => {
                           onCustomNameChange(e.target.value);
-                          validateField('name', e.target.value);
+                          validateField("name", e.target.value);
                         }}
                         placeholder={t.accountHolderPlaceholder}
                         className={`w-full px-4 py-2.5 border rounded-lg focus:ring-1 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-base sm:text-sm ${
-                          errors.name 
-                            ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400'
-                            : 'border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-500 focus:ring-gray-900 dark:focus:ring-gray-500'
+                          errors.name
+                            ? "border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400"
+                            : "border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-500 focus:ring-gray-900 dark:focus:ring-gray-500"
                         }`}
                         title={t.tooltipAccountName}
                         autoFocus
                       />
                       {errors.name && (
-                        <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.name}</p>
+                        <p className="text-red-500 dark:text-red-400 text-xs mt-1">
+                          {errors.name}
+                        </p>
                       )}
                     </div>
                     <div>
@@ -1013,18 +1027,20 @@
                         value={customNumber}
                         onChange={(e) => {
                           onCustomNumberChange(e.target.value);
-                          validateField('number', e.target.value);
+                          validateField("number", e.target.value);
                         }}
                         placeholder={t.accountNumberPlaceholder}
                         className={`w-full px-4 py-2.5 border rounded-lg focus:ring-1 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-base sm:text-sm font-mono ${
-                          errors.number 
-                            ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400'
-                            : 'border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-500 focus:ring-gray-900 dark:focus:ring-gray-500'
+                          errors.number
+                            ? "border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400"
+                            : "border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-500 focus:ring-gray-900 dark:focus:ring-gray-500"
                         }`}
                         title={t.tooltipAccountNumber}
                       />
                       {errors.number && (
-                        <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.number}</p>
+                        <p className="text-red-500 dark:text-red-400 text-xs mt-1">
+                          {errors.number}
+                        </p>
                       )}
                     </div>
                     <div>
@@ -1036,18 +1052,20 @@
                         value={customVendor}
                         onChange={(e) => {
                           onCustomVendorChange(e.target.value);
-                          validateField('vendor', e.target.value);
+                          validateField("vendor", e.target.value);
                         }}
                         placeholder={t.bankEwalletPlaceholder}
                         className={`w-full px-4 py-2.5 border rounded-lg focus:ring-1 focus:outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-base sm:text-sm ${
-                          errors.vendor 
-                            ? 'border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400'
-                            : 'border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-500 focus:ring-gray-900 dark:focus:ring-gray-500'
+                          errors.vendor
+                            ? "border-red-500 dark:border-red-400 focus:border-red-500 dark:focus:border-red-400 focus:ring-red-500 dark:focus:ring-red-400"
+                            : "border-gray-300 dark:border-gray-600 focus:border-gray-900 dark:focus:border-gray-500 focus:ring-gray-900 dark:focus:ring-gray-500"
                         }`}
                         title={t.tooltipBankName}
                       />
                       {errors.vendor && (
-                        <p className="text-red-500 dark:text-red-400 text-xs mt-1">{errors.vendor}</p>
+                        <p className="text-red-500 dark:text-red-400 text-xs mt-1">
+                          {errors.vendor}
+                        </p>
                       )}
                     </div>
                   </div>
@@ -1093,7 +1111,9 @@
         return (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4 animate-fade-in">
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-slide-down">
-              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">{title}</h3>
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
+                {title}
+              </h3>
               <p className="text-gray-600 dark:text-gray-300 mb-6">{message}</p>
               <div className="flex gap-3">
                 <button
@@ -1121,29 +1141,27 @@
         const VERSION_KEY = "splitBillSeenVersion";
 
         const changelog = {
-          "v2.7.0": {
-            en: {
-              new: [
-                "Payment Tracker widget — mark each person as paid/unpaid",
-                "What's New modal — shows once per version on launch",
-              ],
-              improved: [
-                "Download and Copy buttons now show status independently",
-                "Language support for Payment Tracker widget",
-              ],
-              removed: [],
-            },
-            id: {
-              new: [
-                "Widget Pelacak Pembayaran — tandai setiap orang sebagai sudah/belum bayar",
-                "Modal Yang Baru — tampil sekali per versi saat dibuka",
-              ],
-              improved: [
-                "Tombol Unduh dan Salin kini menampilkan status secara mandiri",
-                "Dukungan bahasa untuk widget Pelacak Pembayaran",
-              ],
-              removed: [],
-            },
+          en: {
+            new: [
+              "Payment Tracker widget — mark each person as paid/unpaid",
+              "What's New modal — shows once per version on launch",
+            ],
+            improved: [
+              "Download and Copy buttons now show status independently",
+              "Language support for Payment Tracker widget",
+            ],
+            removed: [],
+          },
+          id: {
+            new: [
+              "Widget Pelacak Pembayaran — tandai setiap orang sebagai sudah/belum bayar",
+              "Modal Yang Baru — tampil sekali per versi saat dibuka",
+            ],
+            improved: [
+              "Tombol Unduh dan Salin kini menampilkan status secara mandiri",
+              "Dukungan bahasa untuk widget Pelacak Pembayaran",
+            ],
+            removed: [],
           },
         };
         const LANGUAGE_KEY = "splitBillLanguage";
@@ -1180,13 +1198,13 @@
             const savedData = localStorage.getItem(STORAGE_KEY);
             if (savedData) {
               const parsed = JSON.parse(savedData);
-              
+
               // Migrate: Convert string quantities to numbers
               if (parsed.items) {
-                parsed.items = parsed.items.map(item => {
+                parsed.items = parsed.items.map((item) => {
                   const newPersons = {};
-                  if (item.persons && typeof item.persons === 'object') {
-                    Object.keys(item.persons).forEach(person => {
+                  if (item.persons && typeof item.persons === "object") {
+                    Object.keys(item.persons).forEach((person) => {
                       const qty = Number(item.persons[person]);
                       if (!isNaN(qty) && qty > 0) {
                         newPersons[person] = qty;
@@ -1195,12 +1213,15 @@
                   }
                   return {
                     ...item,
-                    persons: newPersons
+                    persons: newPersons,
                   };
                 });
               }
-              
-              if (!parsed.paymentStatus || typeof parsed.paymentStatus !== "object") {
+
+              if (
+                !parsed.paymentStatus ||
+                typeof parsed.paymentStatus !== "object"
+              ) {
                 parsed.paymentStatus = {};
               }
 
@@ -1217,18 +1238,18 @@
         const [items, setItems] = useState(
           initialData?.items || [
             { id: 1, name: "", price: "", persons: {}, priceType: "unit" },
-          ]
+          ],
         );
         const [persons, setPersons] = useState(initialData?.persons || []);
         const [newPersonName, setNewPersonName] = useState("");
 
         const [ongkir, setOngkir] = useState(initialData?.ongkir || "");
         const [biayaLayanan, setBiayaLayanan] = useState(
-          initialData?.biayaLayanan || ""
+          initialData?.biayaLayanan || "",
         );
         const [tax, setTax] = useState(initialData?.tax || "");
         const [taxType, setTaxType] = useState(
-          initialData?.taxType || "percentage"
+          initialData?.taxType || "percentage",
         );
         const [parking, setParking] = useState(initialData?.parking || "0");
         const [diskon, setDiskon] = useState(initialData?.diskon || "");
@@ -1237,20 +1258,20 @@
         const [bankAccounts, setBankAccounts] = useState(
           initialData?.bankAccounts || [
             { name: "Custom", number: "CUSTOM", vendor: "Custom" },
-          ]
+          ],
         );
 
         const [selectedAccount, setSelectedAccount] = useState(
-          initialData?.selectedAccount || null
+          initialData?.selectedAccount || null,
         );
         const [customAccountName, setCustomAccountName] = useState(
-          initialData?.customAccountName || ""
+          initialData?.customAccountName || "",
         );
         const [customAccountNumber, setCustomAccountNumber] = useState(
-          initialData?.customAccountNumber || ""
+          initialData?.customAccountNumber || "",
         );
         const [customAccountVendor, setCustomAccountVendor] = useState(
-          initialData?.customAccountVendor || ""
+          initialData?.customAccountVendor || "",
         );
 
         const [isCapturing, setIsCapturing] = useState(false);
@@ -1280,7 +1301,7 @@
         const [dragOverIndex, setDragOverIndex] = useState(null);
         const [collapsedSections, setCollapsedSections] = useState({});
         const [roundTo100, setRoundTo100] = useState(
-          initialData?.roundTo100 || false
+          initialData?.roundTo100 || false,
         );
         const [showCalculator, setShowCalculator] = useState(true);
         const [calcDisplay, setCalcDisplay] = useState("0");
@@ -1299,7 +1320,7 @@
           y: 620,
         });
         const [paymentStatus, setPaymentStatus] = useState(
-          initialData?.paymentStatus || {}
+          initialData?.paymentStatus || {},
         );
         const [isDraggingWidget, setIsDraggingWidget] = useState(null);
         const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
@@ -1405,10 +1426,10 @@
         // Show "What's New" modal once per version
         React.useEffect(() => {
           const seenVersion = localStorage.getItem(VERSION_KEY);
-          if (seenVersion !== appVersion && changelog[appVersion]) {
+          if (seenVersion !== appVersion && changelog[language]) {
             setShowWhatsNew(true);
           }
-        }, []);
+        }, [appVersion, language]);
 
         const dismissWhatsNew = () => {
           localStorage.setItem(VERSION_KEY, appVersion);
@@ -1428,7 +1449,7 @@
 
           const accountExists = bankAccounts.some(
             (acc) =>
-              acc.number === newAccount.number && acc.number !== "CUSTOM"
+              acc.number === newAccount.number && acc.number !== "CUSTOM",
           );
 
           if (accountExists) {
@@ -1453,7 +1474,7 @@
           if (accountNumber === "CUSTOM") return;
 
           const updatedAccounts = bankAccounts.filter(
-            (acc) => acc.number !== accountNumber
+            (acc) => acc.number !== accountNumber,
           );
           setBankAccounts(updatedAccounts);
 
@@ -1537,8 +1558,8 @@
         const updateItem = (id, field, value) => {
           setItems(
             items.map((item) =>
-              item.id === id ? { ...item, [field]: value } : item
-            )
+              item.id === id ? { ...item, [field]: value } : item,
+            ),
           );
         };
 
@@ -1559,13 +1580,13 @@
                 return { ...item, persons: newPersons };
               }
               return item;
-            })
+            }),
           );
         };
 
         const setPersonQuantity = (itemId, person, quantity) => {
           const numQty = Number(quantity);
-          
+
           setItems(
             items.map((item) => {
               if (item.id === itemId) {
@@ -1580,7 +1601,7 @@
                 return { ...item, persons: newPersons };
               }
               return item;
-            })
+            }),
           );
         };
 
@@ -1600,7 +1621,7 @@
               const newPersons = { ...item.persons };
               delete newPersons[person];
               return { ...item, persons: newPersons };
-            })
+            }),
           );
           setPaymentStatus((prev) => {
             const next = { ...prev };
@@ -1639,7 +1660,7 @@
           const subtotal = items.reduce((sum, item) => {
             const itemPrice = Number(item.price || 0);
             const personsList = Object.keys(item.persons);
-            
+
             if (personsList.length === 0 || itemPrice === 0) {
               return sum;
             }
@@ -1651,13 +1672,13 @@
               // Per unit price - multiply by total quantities
               const totalQuantity = Object.values(item.persons).reduce(
                 (q, qty) => q + (Number(qty) || 0),
-                0
+                0,
               );
-              
+
               if (totalQuantity === 0) {
                 return sum;
               }
-              
+
               return sum + itemPrice * totalQuantity;
             }
           }, 0);
@@ -1670,7 +1691,7 @@
           // Net shared fees = (shipping - shipping discount) + service + parking
           const netShipping = Math.max(
             0,
-            Number(ongkir || 0) - shippingDiscount
+            Number(ongkir || 0) - shippingDiscount,
           );
           const sharedFees =
             netShipping + Number(biayaLayanan || 0) + Number(parking || 0);
@@ -1686,7 +1707,7 @@
           items.forEach((item) => {
             const itemPrice = Number(item.price || 0);
             const personsList = Object.keys(item.persons);
-            
+
             if (personsList.length === 0 || itemPrice === 0) {
               return;
             }
@@ -1695,13 +1716,13 @@
               // Total price divided by total portions
               const totalPortions = Object.values(item.persons).reduce(
                 (sum, qty) => sum + (Number(qty) || 0),
-                0
+                0,
               );
-              
+
               if (totalPortions === 0) {
                 return;
               }
-              
+
               const pricePerPortion = itemPrice / totalPortions;
 
               personsList.forEach((person) => {
@@ -1723,7 +1744,7 @@
 
           const totalItemsAssigned = Object.values(personSubtotals).reduce(
             (sum, val) => sum + val,
-            0
+            0,
           );
 
           // Calculate total tax amount
@@ -1780,7 +1801,7 @@
             return customAccountName || "Custom";
           }
           const account = bankAccounts.find(
-            (acc) => acc.number === selectedAccount
+            (acc) => acc.number === selectedAccount,
           );
           return account ? account.name : "";
         };
@@ -1790,7 +1811,7 @@
             return customAccountVendor || "Custom";
           }
           const account = bankAccounts.find(
-            (acc) => acc.number === selectedAccount
+            (acc) => acc.number === selectedAccount,
           );
           return account ? account.vendor : "";
         };
@@ -1874,7 +1895,7 @@
 
             if (
               cleanLine.match(
-                /order summary|reorder|terima kasih|thank you|receipt|struk|cutlery|profile|contact|earned|points/i
+                /order summary|reorder|terima kasih|thank you|receipt|struk|cutlery|profile|contact|earned|points/i,
               )
             ) {
               return;
@@ -1889,7 +1910,7 @@
               cleanLine.toLowerCase().includes("voucher")
             ) {
               const negativeMatch = cleanLine.match(
-                /-\s*(?:Rp\.?\s*)?(\d{1,3}(?:[.,]\d{3})*)/
+                /-\s*(?:Rp\.?\s*)?(\d{1,3}(?:[.,]\d{3})*)/,
               );
 
               if (negativeMatch) {
@@ -1907,11 +1928,11 @@
                 return;
               } else {
                 const positiveMatch = cleanLine.match(
-                  /(?:Rp\.?\s*)?(\d{1,3}(?:[.,]\d{3})*)/
+                  /(?:Rp\.?\s*)?(\d{1,3}(?:[.,]\d{3})*)/,
                 );
                 if (positiveMatch) {
                   const amount = parseInt(
-                    positiveMatch[1].replace(/[.,]/g, "")
+                    positiveMatch[1].replace(/[.,]/g, ""),
                   );
                   if (amount >= 100) {
                     totalPromoDiscount += amount;
@@ -2029,7 +2050,7 @@
             if (parsedData.voucher) setVoucher(parsedData.voucher);
 
             setCaptureStatus(
-              `${t.scanSuccess} ${parsedData.items.length} ${t.items}`
+              `${t.scanSuccess} ${parsedData.items.length} ${t.items}`,
             );
           } catch (error) {
             console.error(error);
@@ -2180,7 +2201,9 @@
 
             const response = await fetch(dataUrl);
             const blob = await response.blob();
-            await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+            await navigator.clipboard.write([
+              new ClipboardItem({ "image/png": blob }),
+            ]);
             setPaymentCopyStatus(t.copied);
           } catch (err) {
             console.error(err);
@@ -2192,29 +2215,31 @@
 
         const formatCalcDisplay = (value) => {
           if (!value || value === "0") return "0";
-          
+
           const strValue = value.toString();
-          
+
           // If it contains a decimal point being entered
           if (strValue.endsWith(".")) {
             const parts = strValue.split(".");
             return Number(parts[0]).toLocaleString("en-US") + ".";
           }
-          
+
           // Check if it's a number
           const num = parseFloat(strValue);
           if (isNaN(num)) return value;
-          
+
           // Split into integer and decimal parts
           const parts = strValue.split(".");
           const integerPart = parts[0];
           const decimalPart = parts[1];
-          
+
           // Format integer part with thousand separators
           const formatted = Number(integerPart).toLocaleString("en-US");
-          
+
           // Add decimal part back if exists
-          return decimalPart !== undefined ? `${formatted}.${decimalPart}` : formatted;
+          return decimalPart !== undefined
+            ? `${formatted}.${decimalPart}`
+            : formatted;
         };
 
         const handleCalcNumber = (num) => {
@@ -2225,10 +2250,10 @@
               if (prev.includes(".")) return prev;
               return prev === "0" ? "0." : prev + ".";
             }
-            
+
             // If current display is "0", replace it
             if (prev === "0") return num;
-            
+
             // Otherwise append the number
             return prev + num;
           });
@@ -2347,7 +2372,9 @@
                           <Calculator className="w-5 h-5" />
                         </button>
                         <button
-                          onClick={() => setShowPaymentTracker(!showPaymentTracker)}
+                          onClick={() =>
+                            setShowPaymentTracker(!showPaymentTracker)
+                          }
                           className="hidden md:flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                           title={t.tooltipPaymentTracker}
                         >
@@ -2610,36 +2637,37 @@
                               </button>
                             </div>
                           </div>
-                          {Object.keys(item.persons).length > 0 && item.price && (
-                            <span className="text-xs text-gray-400 dark:text-gray-300 break-all">
-                              {(() => {
-                                const totalQty = Object.values(
-                                  item.persons
-                                ).reduce(
-                                  (sum, qty) => sum + (Number(qty) || 0),
-                                  0
-                                );
-                                const price = Number(item.price || 0);
+                          {Object.keys(item.persons).length > 0 &&
+                            item.price && (
+                              <span className="text-xs text-gray-400 dark:text-gray-300 break-all">
+                                {(() => {
+                                  const totalQty = Object.values(
+                                    item.persons,
+                                  ).reduce(
+                                    (sum, qty) => sum + (Number(qty) || 0),
+                                    0,
+                                  );
+                                  const price = Number(item.price || 0);
 
-                                if (totalQty === 0 || price === 0) {
-                                  return "";
-                                }
+                                  if (totalQty === 0 || price === 0) {
+                                    return "";
+                                  }
 
-                                if (item.priceType === "unit") {
-                                  return `(${totalQty}x Rp ${formatMoney(
-                                    price
-                                  )} = Rp ${formatMoney(price * totalQty)})`;
-                                } else {
-                                  const pricePerPortion = price / totalQty;
-                                  return `(Rp ${formatMoney(
-                                    price
-                                  )} ÷ ${totalQty} = Rp ${formatMoney(
-                                    pricePerPortion
-                                  )})`;
-                                }
-                              })()}
-                            </span>
-                          )}
+                                  if (item.priceType === "unit") {
+                                    return `(${totalQty}x Rp ${formatMoney(
+                                      price,
+                                    )} = Rp ${formatMoney(price * totalQty)})`;
+                                  } else {
+                                    const pricePerPortion = price / totalQty;
+                                    return `(Rp ${formatMoney(
+                                      price,
+                                    )} ÷ ${totalQty} = Rp ${formatMoney(
+                                      pricePerPortion,
+                                    )})`;
+                                  }
+                                })()}
+                              </span>
+                            )}
                         </div>
 
                         <div className="mt-4">
@@ -2659,7 +2687,7 @@
                                     setPersonQuantity(
                                       item.id,
                                       person,
-                                      quantity - 1
+                                      quantity - 1,
                                     );
                                   }
                                 };
@@ -2669,7 +2697,7 @@
                                   setPersonQuantity(
                                     item.id,
                                     person,
-                                    quantity + 1
+                                    quantity + 1,
                                   );
                                 };
 
@@ -2828,7 +2856,7 @@
                             setTaxType(
                               taxType === "percentage"
                                 ? "currency"
-                                : "percentage"
+                                : "percentage",
                             )
                           }
                           className="px-3 py-2.5 bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500 text-gray-900 dark:text-gray-100 rounded-lg transition border border-gray-300 dark:border-gray-600 text-sm font-medium whitespace-nowrap flex items-center justify-center"
@@ -3043,9 +3071,9 @@
                                       {formatMoneySplit(
                                         roundTo100
                                           ? roundToNearest100(
-                                              personTotals[person] || 0
+                                              personTotals[person] || 0,
                                             )
-                                          : personTotals[person] || 0
+                                          : personTotals[person] || 0,
                                       )}
                                     </span>
                                   </div>
@@ -3065,31 +3093,35 @@
                                           <div className="space-y-2">
                                             {personItems.map((item) => {
                                               const itemPrice = Number(
-                                                item.price || 0
+                                                item.price || 0,
                                               );
                                               const quantity = Number(
-                                                item.persons[person] || 0
+                                                item.persons[person] || 0,
                                               );
-                                              
-                                              if (quantity === 0 || itemPrice === 0) {
+
+                                              if (
+                                                quantity === 0 ||
+                                                itemPrice === 0
+                                              ) {
                                                 return null;
                                               }
-                                              
+
                                               let displayPrice;
 
                                               if (item.priceType === "total") {
                                                 const totalPortions =
                                                   Object.values(
-                                                    item.persons
+                                                    item.persons,
                                                   ).reduce(
-                                                    (sum, qty) => sum + (Number(qty) || 0),
-                                                    0
+                                                    (sum, qty) =>
+                                                      sum + (Number(qty) || 0),
+                                                    0,
                                                   );
-                                                
+
                                                 if (totalPortions === 0) {
                                                   return null;
                                                 }
-                                                
+
                                                 const pricePerPortion =
                                                   itemPrice / totalPortions;
                                                 displayPrice =
@@ -3121,11 +3153,12 @@
                                                         {formatMoney(itemPrice)}{" "}
                                                         ÷{" "}
                                                         {Object.values(
-                                                          item.persons
+                                                          item.persons,
                                                         ).reduce(
                                                           (sum, qty) =>
-                                                            sum + (Number(qty) || 0),
-                                                          0
+                                                            sum +
+                                                            (Number(qty) || 0),
+                                                          0,
                                                         )}{" "}
                                                         portions
                                                       </div>
@@ -3148,7 +3181,7 @@
                                             <span className="font-mono font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
                                               Rp{" "}
                                               {formatMoneySplit(
-                                                personSubtotals[person] || 0
+                                                personSubtotals[person] || 0,
                                               )}
                                             </span>
                                           </div>
@@ -3161,7 +3194,7 @@
                                                 <span className="font-mono whitespace-nowrap">
                                                   + Rp{" "}
                                                   {formatMoneySplit(
-                                                    sharedFees / persons.length
+                                                    sharedFees / persons.length,
                                                   )}
                                                 </span>
                                               </div>
@@ -3176,7 +3209,7 @@
                                                 {formatMoneySplit(
                                                   taxAmount *
                                                     (personSubtotals[person] /
-                                                      subtotal)
+                                                      subtotal),
                                                 )}
                                               </span>
                                             </div>
@@ -3192,7 +3225,7 @@
                                                   {formatMoneySplit(
                                                     Number(voucher) *
                                                       (personSubtotals[person] /
-                                                        subtotal)
+                                                        subtotal),
                                                   )}
                                                 </span>
                                               </div>
@@ -3207,13 +3240,13 @@
                                               {roundTo100 &&
                                               (personTotals[person] || 0) !==
                                                 roundToNearest100(
-                                                  personTotals[person] || 0
+                                                  personTotals[person] || 0,
                                                 ) ? (
                                                 <span className="inline-block">
                                                   <span className="text-gray-400 dark:text-gray-500">
                                                     Rp{" "}
                                                     {formatMoneySplit(
-                                                      personTotals[person] || 0
+                                                      personTotals[person] || 0,
                                                     )}
                                                   </span>
                                                   <span className="mx-1 text-gray-400 dark:text-gray-500">
@@ -3224,8 +3257,8 @@
                                                     {formatMoneySplit(
                                                       roundToNearest100(
                                                         personTotals[person] ||
-                                                          0
-                                                      )
+                                                          0,
+                                                      ),
                                                     )}
                                                   </span>
                                                 </span>
@@ -3233,7 +3266,7 @@
                                                 <span>
                                                   Rp{" "}
                                                   {formatMoneySplit(
-                                                    personTotals[person] || 0
+                                                    personTotals[person] || 0,
                                                   )}
                                                 </span>
                                               )}
@@ -3313,14 +3346,18 @@
                 )}
 
                 {/* What's New Modal */}
-                {showWhatsNew && changelog[appVersion] && (
+                {showWhatsNew && changelog[language] && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4 animate-fade-in">
                     <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-slide-down">
                       <div className="flex items-center gap-2 mb-4">
                         <span className="text-xl">🎉</span>
                         <div className="flex items-baseline gap-2">
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t.whatsNew}</h3>
-                          <span className="text-lg font-bold text-gray-400 dark:text-gray-500">{appVersion}</span>
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                            {t.whatsNew}
+                          </h3>
+                          <span className="text-lg font-bold text-gray-400 dark:text-gray-500">
+                            {appVersion}
+                          </span>
                         </div>
                       </div>
                       <div className="space-y-4 mb-6">
@@ -3329,14 +3366,19 @@
                           { key: "improved", label: t.whatsNewImproved },
                           { key: "removed", label: t.whatsNewRemoved },
                         ].map(({ key, label }) => {
-                          const items = changelog[appVersion][language][key];
+                          const items = changelog[language][key];
                           if (!items || items.length === 0) return null;
                           return (
                             <div key={key}>
-                              <p className="text-xs font-bold uppercase tracking-wide mb-1.5 text-gray-400 dark:text-gray-500">{label}</p>
+                              <p className="text-xs font-bold uppercase tracking-wide mb-1.5 text-gray-400 dark:text-gray-500">
+                                {label}
+                              </p>
                               <ul className="space-y-1.5">
                                 {items.map((item, i) => (
-                                  <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                  <li
+                                    key={i}
+                                    className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300"
+                                  >
                                     <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-gray-400 dark:bg-gray-500" />
                                     <span>{item}</span>
                                   </li>
@@ -3509,118 +3551,134 @@
             {showPaymentTracker && (
               <div
                 className="hidden md:block fixed z-40 animate-fade-in"
-                style={{ left: `${paymentTrackerPos.x}px`, top: `${paymentTrackerPos.y}px` }}
+                style={{
+                  left: `${paymentTrackerPos.x}px`,
+                  top: `${paymentTrackerPos.y}px`,
+                }}
               >
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 w-64">
                   <div ref={paymentTrackerRef}>
-                  {/* Drag Handle / Header */}
-                  <div
-                    className="flex items-center justify-between px-4 py-3 cursor-move border-b border-gray-200 dark:border-gray-700 rounded-t-xl"
-                    onMouseDown={(e) => {
-                      setIsDraggingWidget("payment");
-                      setDragOffset({
-                        x: e.clientX - paymentTrackerPos.x,
-                        y: e.clientY - paymentTrackerPos.y,
-                      });
-                    }}
-                    onDoubleClick={() =>
-                      setPaymentTrackerPos({
-                        x: window.innerWidth - 320,
-                        y: 620,
-                      })
-                    }
-                  >
-                    <span className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                      <ListChecks className="w-4 h-4" />
-                      {t.widgetPaymentTracker}
-                    </span>
-                    <button
-                      onClick={() => setShowPaymentTracker(false)}
-                      className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition text-xl leading-none"
+                    {/* Drag Handle / Header */}
+                    <div
+                      className="flex items-center justify-between px-4 py-3 cursor-move border-b border-gray-200 dark:border-gray-700 rounded-t-xl"
+                      onMouseDown={(e) => {
+                        setIsDraggingWidget("payment");
+                        setDragOffset({
+                          x: e.clientX - paymentTrackerPos.x,
+                          y: e.clientY - paymentTrackerPos.y,
+                        });
+                      }}
+                      onDoubleClick={() =>
+                        setPaymentTrackerPos({
+                          x: window.innerWidth - 320,
+                          y: 620,
+                        })
+                      }
                     >
-                      ×
-                    </button>
-                  </div>
+                      <span className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+                        <ListChecks className="w-4 h-4" />
+                        {t.widgetPaymentTracker}
+                      </span>
+                      <button
+                        onClick={() => setShowPaymentTracker(false)}
+                        className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition text-xl leading-none"
+                      >
+                        ×
+                      </button>
+                    </div>
 
-                  {/* Body */}
-                  <div className="p-3 max-h-80 overflow-y-auto">
-                    {persons.length === 0 ? (
-                      <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">
-                        {t.paymentNoPeople}
-                      </p>
-                    ) : (() => {
-                      const splitResult = calculateSplit();
-                      const unpaid = persons.filter((p) => !paymentStatus[p]);
-                      const paid = persons.filter((p) => paymentStatus[p]);
+                    {/* Body */}
+                    <div className="p-3 max-h-80 overflow-y-auto">
+                      {persons.length === 0 ? (
+                        <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">
+                          {t.paymentNoPeople}
+                        </p>
+                      ) : (
+                        (() => {
+                          const splitResult = calculateSplit();
+                          const unpaid = persons.filter(
+                            (p) => !paymentStatus[p],
+                          );
+                          const paid = persons.filter((p) => paymentStatus[p]);
 
-                      const togglePayment = (person) => {
-                        setPaymentStatus((prev) => ({
-                          ...prev,
-                          [person]: !prev[person],
-                        }));
-                      };
+                          const togglePayment = (person) => {
+                            setPaymentStatus((prev) => ({
+                              ...prev,
+                              [person]: !prev[person],
+                            }));
+                          };
 
-                      const PersonRow = ({ person, isPaid }) => {
-                        const amount = splitResult.personTotals[person] || 0;
-                        return (
-                          <button
-                            key={person}
-                            onClick={() => togglePayment(person)}
-                            className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-700"
-                          >
-                            <span
-                              className={`text-sm font-medium truncate ${
-                                isPaid
-                                  ? "text-gray-400 dark:text-gray-500 line-through"
-                                  : "text-gray-800 dark:text-gray-200"
-                              }`}
-                            >
-                              {person}
-                            </span>
-                            <span className="text-xs font-mono flex-shrink-0 text-gray-500 dark:text-gray-400">
-                              Rp {formatMoneySplit(amount)}
-                            </span>
-                          </button>
-                        );
-                      };
+                          const PersonRow = ({ person, isPaid }) => {
+                            const amount =
+                              splitResult.personTotals[person] || 0;
+                            return (
+                              <button
+                                key={person}
+                                onClick={() => togglePayment(person)}
+                                className="w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg text-left transition hover:bg-gray-100 dark:hover:bg-gray-700"
+                              >
+                                <span
+                                  className={`flex-1 min-w-0 text-sm font-medium truncate ${
+                                    isPaid
+                                      ? "text-gray-400 dark:text-gray-500 line-through"
+                                      : "text-gray-800 dark:text-gray-200"
+                                  }`}
+                                >
+                                  {person}
+                                </span>
+                                <span className="text-xs font-mono flex-shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                                  Rp {formatMoneySplit(amount)}
+                                </span>
+                              </button>
+                            );
+                          };
 
-                      return (
-                        <>
-                          {unpaid.length > 0 && (
-                            <div className="mb-2">
-                              <div className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 px-2 mb-1">
-                                {t.paymentUnpaid} ({unpaid.length})
-                              </div>
-                              {unpaid.map((person) => (
-                                <PersonRow key={person} person={person} isPaid={false} />
-                              ))}
-                            </div>
-                          )}
+                          return (
+                            <>
+                              {unpaid.length > 0 && (
+                                <div className="mb-2">
+                                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 px-2 mb-1">
+                                    {t.paymentUnpaid} ({unpaid.length})
+                                  </div>
+                                  {unpaid.map((person) => (
+                                    <PersonRow
+                                      key={person}
+                                      person={person}
+                                      isPaid={false}
+                                    />
+                                  ))}
+                                </div>
+                              )}
 
-                          {unpaid.length > 0 && paid.length > 0 && (
-                            <div className="border-t border-gray-100 dark:border-gray-700 my-2" />
-                          )}
+                              {unpaid.length > 0 && paid.length > 0 && (
+                                <div className="border-t border-gray-100 dark:border-gray-700 my-2" />
+                              )}
 
-                          {paid.length > 0 && (
-                            <div>
-                              <div className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 px-2 mb-1">
-                                {t.paymentPaid} ({paid.length})
-                              </div>
-                              {paid.map((person) => (
-                                <PersonRow key={person} person={person} isPaid={true} />
-                              ))}
-                            </div>
-                          )}
+                              {paid.length > 0 && (
+                                <div>
+                                  <div className="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 px-2 mb-1">
+                                    {t.paymentPaid} ({paid.length})
+                                  </div>
+                                  {paid.map((person) => (
+                                    <PersonRow
+                                      key={person}
+                                      person={person}
+                                      isPaid={true}
+                                    />
+                                  ))}
+                                </div>
+                              )}
 
-                          {paid.length > 0 && unpaid.length === 0 && (
-                            <div className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500 font-medium py-1">
-                              {t.paymentAllSettled}
-                            </div>
-                          )}
-                        </>
-                      );
-                    })()}
-                  </div>
+                              {paid.length > 0 && unpaid.length === 0 && (
+                                <div className="mt-2 text-center text-xs text-gray-400 dark:text-gray-500 font-medium py-1">
+                                  {t.paymentAllSettled}
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()
+                      )}
+                    </div>
                   </div>
                   {/* Copy Button */}
                   <div className="px-3 pb-3">
@@ -3699,7 +3757,7 @@
                             currentTime.getMinutes() * 0.5 -
                             90) *
                             Math.PI) /
-                            180
+                            180,
                         )
                     }
                     y2={
@@ -3710,7 +3768,7 @@
                             currentTime.getMinutes() * 0.5 -
                             90) *
                             Math.PI) /
-                            180
+                            180,
                         )
                     }
                     stroke="currentColor"
@@ -3727,14 +3785,14 @@
                       60 +
                       40 *
                         Math.cos(
-                          ((currentTime.getMinutes() * 6 - 90) * Math.PI) / 180
+                          ((currentTime.getMinutes() * 6 - 90) * Math.PI) / 180,
                         )
                     }
                     y2={
                       60 +
                       40 *
                         Math.sin(
-                          ((currentTime.getMinutes() * 6 - 90) * Math.PI) / 180
+                          ((currentTime.getMinutes() * 6 - 90) * Math.PI) / 180,
                         )
                     }
                     stroke="currentColor"
@@ -3751,14 +3809,14 @@
                       60 +
                       45 *
                         Math.cos(
-                          ((currentTime.getSeconds() * 6 - 90) * Math.PI) / 180
+                          ((currentTime.getSeconds() * 6 - 90) * Math.PI) / 180,
                         )
                     }
                     y2={
                       60 +
                       45 *
                         Math.sin(
-                          ((currentTime.getSeconds() * 6 - 90) * Math.PI) / 180
+                          ((currentTime.getSeconds() * 6 - 90) * Math.PI) / 180,
                         )
                     }
                     stroke="currentColor"
@@ -3802,12 +3860,13 @@
             {/* Author Credit - Bottom Left */}
             <div className="fixed bottom-4 left-4 z-30 hidden md:block">
               <div className="text-xs text-gray-400 dark:text-gray-600 space-y-0.5">
-                <p className="font-medium text-gray-500 dark:text-gray-500">{t.authorLabel}: Geovann Chandra</p>
+                <p className="font-medium text-gray-500 dark:text-gray-500">
+                  {t.authorLabel}: Geovann Chandra
+                </p>
                 <p>{t.authorContact}: Chandra, Geovann</p>
                 <p>{t.authorReach}</p>
               </div>
             </div>
-
           </div>
         );
       }
