@@ -94,6 +94,14 @@
           personNamePlaceholder: "Person name (Press Enter)",
           add: "Add",
           noPeopleAdded: "No people added yet.",
+          duplicatePerson: "This name is already in the list.",
+          searchPeoplePlaceholder: "Search people...",
+          noSearchResults: "No people match your search.",
+          bulkInsert: "Bulk Insert",
+          bulkInsertTitle: "Bulk Insert",
+          bulkInsertPlaceholder: `How to use:\nType one entry per line in this format:\n\n  Person : Item\n\nExample:\n  Alice : Nasi Goreng\n  Bob : Mie Ayam\n  Charlie : Nasi Goreng\n  Diana : Es Teh\n\nPeople and items will be added automatically.\nDuplicate names are handled — no worries.\nYou can fill in the prices after.`,
+          bulkInsertConfirm: "Insert",
+          bulkInsertCancel: "Cancel",
           itemsList: "Items List",
           itemPlaceholder: "Item #",
           deleteItem: "Delete Item",
@@ -237,6 +245,14 @@
           personNamePlaceholder: "Nama orang (Tekan Enter)",
           add: "Tambah",
           noPeopleAdded: "Belum ada orang yang ditambahkan.",
+          duplicatePerson: "Nama ini sudah ada di daftar.",
+          bulkInsert: "Masukkan Massal",
+          bulkInsertTitle: "Masukkan Massal",
+          bulkInsertPlaceholder: `Cara penggunaan:\nTulis satu entri per baris dengan format:\n\n  Orang : Barang\n\nContoh:\n  Alice : Nasi Goreng\n  Bob : Mie Ayam\n  Charlie : Nasi Goreng\n  Diana : Es Teh\n\nOrang dan barang akan ditambahkan otomatis.\nNama duplikat ditangani — tidak perlu khawatir.\nHarga bisa diisi setelah ini.`,
+          bulkInsertConfirm: "Masukkan",
+          bulkInsertCancel: "Batal",
+          searchPeoplePlaceholder: "Cari orang...",
+          noSearchResults: "Tidak ada orang yang cocok dengan pencarian.",
           itemsList: "Daftar Barang",
           itemPlaceholder: "Barang #",
           deleteItem: "Hapus Barang",
@@ -1136,30 +1152,26 @@
 
       // --- MAIN APP ---
       function SplitBill() {
-        const appVersion = "v2.7.0";
+        const appVersion = "v2.8.0";
         const STORAGE_KEY = "splitBillData";
         const VERSION_KEY = "splitBillSeenVersion";
 
         const changelog = {
           en: {
             new: [
-              "Payment Tracker widget — mark each person as paid/unpaid",
-              "What's New modal — shows once per version on launch",
+              "Bulk Insert — paste a list of Person : Item entries to add people and items at once",
             ],
             improved: [
-              "Download and Copy buttons now show status independently",
-              "Language support for Payment Tracker widget",
+              "People List redesigned with search, duplicate validation, and autocomplete",
             ],
             removed: [],
           },
           id: {
             new: [
-              "Widget Pelacak Pembayaran — tandai setiap orang sebagai sudah/belum bayar",
-              "Modal Yang Baru — tampil sekali per versi saat dibuka",
+              "Masukkan Massal — tempel daftar Orang : Barang untuk menambah orang dan barang sekaligus",
             ],
             improved: [
-              "Tombol Unduh dan Salin kini menampilkan status secara mandiri",
-              "Dukungan bahasa untuk widget Pelacak Pembayaran",
+              "Daftar Orang didesain ulang dengan pencarian, validasi duplikat, dan autocomplete",
             ],
             removed: [],
           },
@@ -1242,6 +1254,10 @@
         );
         const [persons, setPersons] = useState(initialData?.persons || []);
         const [newPersonName, setNewPersonName] = useState("");
+        const [duplicatePersonError, setDuplicatePersonError] = useState(false);
+        const [personSearch, setPersonSearch] = useState("");
+        const [showPersonSuggestions, setShowPersonSuggestions] = useState(false);
+        const [itemPersonSearch, setItemPersonSearch] = useState({});
 
         const [ongkir, setOngkir] = useState(initialData?.ongkir || "");
         const [biayaLayanan, setBiayaLayanan] = useState(
@@ -1288,6 +1304,8 @@
 
         const [showResetModal, setShowResetModal] = useState(false);
         const [showWhatsNew, setShowWhatsNew] = useState(false);
+        const [showBulkInsert, setShowBulkInsert] = useState(false);
+        const [bulkInsertText, setBulkInsertText] = useState("");
         const [openAccordions, setOpenAccordions] = useState({});
         const [showOCR, setShowOCR] = useState(false);
         const [darkMode, setDarkMode] = useState(() => {
@@ -1538,6 +1556,60 @@
           setTimeout(() => setCaptureStatus(""), 2000);
         };
 
+        const applyBulkInsert = () => {
+          const lines = bulkInsertText.split("\n");
+          const pairs = [];
+          for (const line of lines) {
+            const colonIdx = line.indexOf(":");
+            if (colonIdx === -1) continue;
+            const person = line.slice(0, colonIdx).trim();
+            const itemName = line.slice(colonIdx + 1).trim();
+            if (!person || !itemName) continue;
+            pairs.push({ person, itemName });
+          }
+          if (pairs.length === 0) { setShowBulkInsert(false); return; }
+
+          // Build new persons list (deduplicated, case-insensitive)
+          const newPersons = [...persons];
+          const newPaymentStatus = {};
+          for (const { person } of pairs) {
+            const exists = newPersons.some((p) => p.toLowerCase() === person.toLowerCase());
+            if (!exists) {
+              newPersons.push(person);
+              newPaymentStatus[person] = false;
+            }
+          }
+
+          // Build new items list (deduplicated by name, case-insensitive)
+          const newItems = [...items.filter((i) => i.name.trim() !== "")];
+          for (const { person, itemName } of pairs) {
+            const existingIdx = newItems.findIndex((i) => i.name.toLowerCase() === itemName.toLowerCase());
+            const resolvedPerson = newPersons.find((p) => p.toLowerCase() === person.toLowerCase()) || person;
+            if (existingIdx !== -1) {
+              if (!newItems[existingIdx].persons[resolvedPerson]) {
+                newItems[existingIdx] = {
+                  ...newItems[existingIdx],
+                  persons: { ...newItems[existingIdx].persons, [resolvedPerson]: 1 },
+                };
+              }
+            } else {
+              newItems.push({
+                id: Date.now() + Math.random() * 1000000,
+                name: itemName,
+                price: "",
+                persons: { [resolvedPerson]: 1 },
+                priceType: "unit",
+              });
+            }
+          }
+
+          setPersons(newPersons);
+          setPaymentStatus((prev) => ({ ...prev, ...newPaymentStatus }));
+          setItems(newItems);
+          setBulkInsertText("");
+          setShowBulkInsert(false);
+        };
+
         const addItem = () => {
           setItems([
             ...items,
@@ -1607,11 +1679,18 @@
 
         const addPerson = () => {
           const trimmed = newPersonName.trim();
-          if (trimmed) {
-            setPersons([...persons, trimmed]);
-            setNewPersonName("");
-            setPaymentStatus((prev) => ({ ...prev, [trimmed]: false }));
+          if (!trimmed) return;
+          const isDuplicate = persons.some(
+            (p) => p.toLowerCase() === trimmed.toLowerCase()
+          );
+          if (isDuplicate) {
+            setDuplicatePersonError(true);
+            return;
           }
+          setDuplicatePersonError(false);
+          setPersons([...persons, trimmed]);
+          setNewPersonName("");
+          setPaymentStatus((prev) => ({ ...prev, [trimmed]: false }));
         };
 
         const removePerson = (person) => {
@@ -2493,22 +2572,57 @@
 
                 {/* People Section */}
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 mb-6 border-2 border-gray-300 dark:border-gray-700 shadow-md">
-                  <div className="flex items-center gap-2 mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
-                    <Users className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                    <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                      {t.peopleList}
-                    </h2>
+                  <div className="flex items-center justify-between mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                      <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                        {t.peopleList}
+                      </h2>
+                    </div>
+                    <button
+                      onClick={() => { setBulkInsertText(""); setShowBulkInsert(true); }}
+                      className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                      {t.bulkInsert}
+                    </button>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2 mb-4">
-                    <input
-                      type="text"
-                      value={newPersonName}
-                      onChange={(e) => setNewPersonName(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && addPerson()}
-                      placeholder={t.personNamePlaceholder}
-                      className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-500 focus:border-gray-900 dark:focus:border-gray-500 focus:outline-none bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-base sm:text-sm"
-                      title={t.tooltipPersonName}
-                    />
+                  <div className="flex flex-col sm:flex-row gap-2 mb-1">
+                    <div className="relative flex-1">
+                      <input
+                        type="text"
+                        value={newPersonName}
+                        onChange={(e) => { setNewPersonName(e.target.value); setDuplicatePersonError(false); setShowPersonSuggestions(true); }}
+                        onKeyPress={(e) => e.key === "Enter" && addPerson()}
+                        onFocus={() => setShowPersonSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowPersonSuggestions(false), 150)}
+                        placeholder={t.personNamePlaceholder}
+                        className={`w-full px-4 py-2.5 border rounded-lg focus:ring-1 focus:outline-none bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-base sm:text-sm ${duplicatePersonError ? "border-red-500 dark:border-red-400 focus:ring-red-500 focus:border-red-500" : "border-gray-300 dark:border-gray-600 focus:ring-gray-900 dark:focus:ring-gray-500 focus:border-gray-900 dark:focus:border-gray-500"}`}
+                        title={t.tooltipPersonName}
+                      />
+                      {showPersonSuggestions && newPersonName.trim() && (() => {
+                        const suggestions = persons.filter((p) =>
+                          p.toLowerCase().includes(newPersonName.trim().toLowerCase())
+                        );
+                        return suggestions.length > 0 ? (
+                          <ul className="absolute z-20 left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden">
+                            {suggestions.map((s) => (
+                              <li key={s}>
+                                <button
+                                  type="button"
+                                  onMouseDown={() => { setNewPersonName(s); setShowPersonSuggestions(false); setDuplicatePersonError(false); }}
+                                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                                >
+                                  {s}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null;
+                      })()}
+                    </div>
                     <button
                       onClick={addPerson}
                       className="bg-gray-900 dark:bg-gray-700 text-white px-6 py-2.5 rounded-lg hover:bg-black dark:hover:bg-gray-600 transition shadow-sm font-medium"
@@ -2517,30 +2631,70 @@
                       {t.add}
                     </button>
                   </div>
+                  {duplicatePersonError && (
+                    <p className="text-xs text-red-500 dark:text-red-400 mb-3">
+                      {t.duplicatePerson}
+                    </p>
+                  )}
                   {persons.length === 0 ? (
-                    <p className="text-sm text-gray-400 dark:text-gray-500 italic">
+                    <p className="text-sm text-gray-400 dark:text-gray-500 italic mt-3">
                       {t.noPeopleAdded}
                     </p>
                   ) : (
-                    <div className="flex flex-wrap gap-2">
-                      {persons.map((person) => (
-                        <div
-                          key={person}
-                          className="bg-black dark:bg-gray-700 text-white dark:text-gray-200 pl-3 pr-2 py-2 rounded-full flex items-center gap-3 border border-black dark:border-gray-600 shadow-sm"
-                        >
-                          <span className="font-medium text-sm">{person}</span>
-                          <button
-                            onClick={() => removePerson(person)}
-                            className="text-gray-300 dark:text-gray-500 hover:text-white dark:hover:text-gray-300 transition"
-                            title={t.tooltipRemovePerson}
-                          >
-                            <span className="block w-3 h-3 leading-3 text-center text-sm font-bold">
-                              ×
-                            </span>
+                    <>
+                      <div className="relative mt-3 mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <input
+                          type="text"
+                          value={personSearch}
+                          onChange={(e) => setPersonSearch(e.target.value)}
+                          placeholder={t.searchPeoplePlaceholder}
+                          className="w-full pl-9 pr-8 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-500 focus:border-gray-900 dark:focus:border-gray-500 focus:outline-none bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+                        />
+                        {personSearch && (
+                          <button onClick={() => setPersonSearch("")} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                           </button>
-                        </div>
-                      ))}
-                    </div>
+                        )}
+                      </div>
+                      {(() => {
+                        const filtered = persons.filter((p) =>
+                          p.toLowerCase().includes(personSearch.toLowerCase())
+                        );
+                        return filtered.length === 0 ? (
+                          <p className="text-sm text-gray-400 dark:text-gray-500 italic py-3">
+                            {t.noSearchResults}
+                          </p>
+                        ) : (
+                          <ul className="divide-y divide-gray-100 dark:divide-gray-700">
+                            {filtered.map((person) => (
+                              <li
+                                key={person}
+                                className="flex items-center justify-between py-2.5 px-4"
+                              >
+                                <span className="flex items-center gap-2.5 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+                                  </svg>
+                                  {person}
+                                </span>
+                                <button
+                                  onClick={() => removePerson(person)}
+                                  className="text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition p-1 rounded"
+                                  title={t.tooltipRemovePerson}
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                  </svg>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        );
+                      })()}
+                    </>
                   )}
                 </div>
 
@@ -2670,131 +2824,105 @@
                             )}
                         </div>
 
-                        <div className="mt-4">
-                          <div className="flex flex-wrap gap-2">
-                            {persons.length === 0 ? (
-                              <span className="text-xs text-gray-400 dark:text-gray-500">
-                                {t.addPeopleFirst}
-                              </span>
-                            ) : (
-                              persons.map((person) => {
+                        <div className="mt-3">
+                          {persons.length === 0 ? (
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
+                              {t.addPeopleFirst}
+                            </span>
+                          ) : (
+                            <>
+                              <div className="relative mb-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                                </svg>
+                                <input
+                                  type="text"
+                                  value={itemPersonSearch[item.id] || ""}
+                                  onChange={(e) => setItemPersonSearch((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                                  placeholder={t.searchPeoplePlaceholder}
+                                  className="w-full pl-8 pr-8 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-500 focus:border-gray-900 dark:focus:border-gray-500 focus:outline-none bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+                                />
+                                {itemPersonSearch[item.id] && (
+                                  <button onClick={() => setItemPersonSearch((prev) => ({ ...prev, [item.id]: "" }))} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                  </button>
+                                )}
+                              </div>
+                              <ul className="divide-y divide-gray-100 dark:divide-gray-700">
+                              {persons.filter((p) => (itemPersonSearch[item.id] || "").trim() === "" || p.toLowerCase().includes((itemPersonSearch[item.id] || "").toLowerCase())).map((person) => {
                                 const quantity = item.persons[person] || 0;
                                 const isSelected = quantity > 0;
 
                                 const handleDecrease = (e) => {
                                   e.stopPropagation();
                                   if (quantity > 1) {
-                                    setPersonQuantity(
-                                      item.id,
-                                      person,
-                                      quantity - 1,
-                                    );
+                                    setPersonQuantity(item.id, person, quantity - 1);
                                   }
                                 };
 
                                 const handleIncrease = (e) => {
                                   e.stopPropagation();
-                                  setPersonQuantity(
-                                    item.id,
-                                    person,
-                                    quantity + 1,
-                                  );
+                                  setPersonQuantity(item.id, person, quantity + 1);
                                 };
 
                                 const handleQuantityChange = (e) => {
                                   e.stopPropagation();
-                                  const value = e.target.value;
-                                  const newQty = parseInt(value);
+                                  const newQty = parseInt(e.target.value);
                                   if (!isNaN(newQty) && newQty >= 1) {
                                     setPersonQuantity(item.id, person, newQty);
                                   }
                                 };
 
-                                if (!isSelected) {
-                                  // Unselected chip - simple button
-                                  return (
+                                return (
+                                  <li key={person} className="flex items-center justify-between py-2.5 gap-3">
                                     <button
-                                      key={person}
-                                      onClick={() =>
-                                        togglePerson(item.id, person)
-                                      }
-                                      className="rounded-full text-sm font-medium transition border select-none flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 px-4 py-2"
+                                      onClick={() => togglePerson(item.id, person)}
+                                      className="flex items-center gap-3 flex-1 text-left min-w-0"
                                       title={t.tooltipPersonSelect}
                                     >
-                                      {person}
-                                    </button>
-                                  );
-                                }
-
-                                // Selected with quantity = 1: show ( name + )
-                                if (quantity === 1) {
-                                  return (
-                                    <div
-                                      key={person}
-                                      className="bg-black dark:bg-gray-600 text-white border border-black dark:border-gray-600 shadow-sm pl-3 pr-2 py-2 rounded-full flex items-center gap-3 text-sm font-medium"
-                                    >
-                                      <button
-                                        onClick={() =>
-                                          togglePerson(item.id, person)
-                                        }
-                                        className="hover:opacity-80 transition"
-                                        title="Click to remove"
-                                      >
+                                      <span className={`w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition ${isSelected ? "bg-gray-900 border-gray-900 dark:bg-gray-500 dark:border-gray-500" : "border-gray-300 dark:border-gray-600"}`}>
+                                        {isSelected && (
+                                          <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="1.5,6 4.5,9.5 10.5,2.5"/>
+                                          </svg>
+                                        )}
+                                      </span>
+                                      <span className={`text-sm font-medium truncate ${isSelected ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
                                         {person}
-                                      </button>
-                                      <button
-                                        onClick={handleIncrease}
-                                        className="text-gray-300 hover:text-white transition font-bold w-6 h-6 flex items-center justify-center text-lg"
-                                        title="Increase quantity"
-                                      >
-                                        +
-                                      </button>
-                                    </div>
-                                  );
-                                }
-
-                                // Selected with quantity > 1: show ( name - [qty] + )
-                                return (
-                                  <div
-                                    key={person}
-                                    className="bg-black dark:bg-gray-600 text-white border border-black dark:border-gray-600 shadow-sm px-3 py-2 rounded-full flex items-center gap-2 text-sm font-medium"
-                                  >
-                                    <button
-                                      onClick={() =>
-                                        togglePerson(item.id, person)
-                                      }
-                                      className="hover:opacity-80 transition"
-                                      title="Click to remove"
-                                    >
-                                      {person}
+                                      </span>
                                     </button>
-                                    <button
-                                      onClick={handleDecrease}
-                                      className="text-gray-300 hover:text-white transition font-bold w-5 h-5 flex items-center justify-center"
-                                      title="Decrease quantity"
-                                    >
-                                      −
-                                    </button>
-                                    <input
-                                      type="number"
-                                      min="1"
-                                      value={quantity}
-                                      onChange={handleQuantityChange}
-                                      className="w-12 px-0 py-0.5 text-center bg-white dark:bg-gray-700 text-black dark:text-white border border-gray-300 dark:border-gray-500 rounded text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                                      onClick={(e) => e.stopPropagation()}
-                                    />
-                                    <button
-                                      onClick={handleIncrease}
-                                      className="text-gray-300 hover:text-white transition font-bold w-5 h-5 flex items-center justify-center"
-                                      title="Increase quantity"
-                                    >
-                                      +
-                                    </button>
-                                  </div>
+                                    {isSelected && (
+                                      <div className="flex items-center gap-1 flex-shrink-0">
+                                        <button
+                                          onClick={handleDecrease}
+                                          className="w-7 h-7 flex items-center justify-center rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition font-bold text-base"
+                                          title="Decrease quantity"
+                                        >
+                                          −
+                                        </button>
+                                        <input
+                                          type="number"
+                                          min="1"
+                                          value={quantity}
+                                          onChange={handleQuantityChange}
+                                          onClick={(e) => e.stopPropagation()}
+                                          className="w-10 py-0.5 text-center bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-500 rounded text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                        />
+                                        <button
+                                          onClick={handleIncrease}
+                                          className="w-7 h-7 flex items-center justify-center rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition font-bold text-base"
+                                          title="Increase quantity"
+                                        >
+                                          +
+                                        </button>
+                                      </div>
+                                    )}
+                                  </li>
                                 );
-                              })
-                            )}
-                          </div>
+                              })}
+                              </ul>
+                            </>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -3398,6 +3526,41 @@
                   </div>
                 )}
 
+                {/* Bulk Insert Modal */}
+                {showBulkInsert && (
+                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl">
+                      <div className="flex items-center gap-2 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-700 dark:text-gray-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{t.bulkInsertTitle}</h3>
+                      </div>
+                      <textarea
+                        value={bulkInsertText}
+                        onChange={(e) => setBulkInsertText(e.target.value)}
+                        rows={10}
+                        placeholder={t.bulkInsertPlaceholder}
+                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-1 focus:ring-gray-900 dark:focus:ring-gray-500 focus:border-gray-900 dark:focus:border-gray-500 focus:outline-none bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm resize-none font-mono"
+                      />
+                      <div className="flex gap-2 mt-4">
+                        <button
+                          onClick={() => setShowBulkInsert(false)}
+                          className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition font-medium text-sm"
+                        >
+                          {t.bulkInsertCancel}
+                        </button>
+                        <button
+                          onClick={applyBulkInsert}
+                          className="flex-1 px-4 py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 rounded-lg hover:bg-black dark:hover:bg-gray-300 transition font-medium text-sm"
+                        >
+                          {t.bulkInsertConfirm}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Confirmation Modal */}
                 <ConfirmModal
                   isOpen={showResetModal}
@@ -3854,17 +4017,6 @@
                     })}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Author Credit - Bottom Left */}
-            <div className="fixed bottom-4 left-4 z-30 hidden md:block">
-              <div className="text-xs text-gray-400 dark:text-gray-600 space-y-0.5">
-                <p className="font-medium text-gray-500 dark:text-gray-500">
-                  {t.authorLabel}: Geovann Chandra
-                </p>
-                <p>{t.authorContact}: Chandra, Geovann</p>
-                <p>{t.authorReach}</p>
               </div>
             </div>
           </div>
