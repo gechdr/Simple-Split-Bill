@@ -96,7 +96,8 @@
     <script type="module">
       // Export Import Splitbill Data
       import { encode, decode } from "https://cdn.jsdelivr.net/npm/@msgpack/msgpack/dist.es5+esm/index.js";
-      export function getTypewriterData() {  
+      
+      window.getTypewriterData = function() {  
         const data = localStorage.getItem(STORAGE_KEY);
         try {
           const encoded = encode(JSON.parse(data));
@@ -109,10 +110,12 @@
         }
       }
 
-      export function loadTypewriterData() {
+      window.loadTypewriterData = function() {
         const params = new URLSearchParams(window.location.search);
         const data = params.get("data");
-        const rbase64 = decodeURIComponent(url);
+        if (!data) return null;
+        
+        const rbase64 = decodeURIComponent(data);
         // 2. rBase64 → binary string
         const binaryString = atob(rbase64);
   
@@ -282,6 +285,18 @@
           paymentPaid: "Paid",
           paymentAllSettled: "All settled up! 🎉",
           paymentNoPeople: "No people added yet.",
+          shareTitle: "Share your split bill",
+          shareDescription: "Share this URL to let others view your split bill:",
+          shareNoData: "Add some items to generate a share link",
+          shareCopyButton: "Copy Link",
+          dataWarningTitle: "Shared Data Detected",
+          dataWarningMessage: "Loading this shared split bill will overwrite your current data. Copy your current data link to backup before proceeding.",
+          dataWarningCopyButton: "Copy My Data Link",
+          dataWarningProceed: "Proceed Without Backup",
+          dataWarningFinalTitle: "Are You Sure?",
+          dataWarningFinalMessage: "Your previous split bill data will be permanently removed! This action cannot be undone.",
+          dataWarningFinalConfirm: "Yes, Replace My Data",
+          dataWarningFinalCancel: "Cancel",
         },
         id: {
           title: "Patungan",
@@ -437,6 +452,18 @@
           paymentPaid: "Sudah Bayar",
           paymentAllSettled: "Semua sudah lunas! 🎉",
           paymentNoPeople: "Belum ada orang yang ditambahkan.",
+          shareTitle: "Bagikan patungan Anda",
+          shareDescription: "Bagikan URL ini agar orang lain bisa melihat patungan Anda:",
+          shareNoData: "Tambahkan barang untuk menghasilkan link berbagi",
+          shareCopyButton: "Salin Link",
+          dataWarningTitle: "Data Bersama Terdeteksi",
+          dataWarningMessage: "Memuat patungan bersama ini akan menimpa data Anda saat ini. Salin link data Anda untuk cadangan sebelum melanjutkan.",
+          dataWarningCopyButton: "Salin Link Data Saya",
+          dataWarningProceed: "Lanjutkan Tanpa Cadangan",
+          dataWarningFinalTitle: "Anda Yakin?",
+          dataWarningFinalMessage: "Data patungan Anda sebelumnya akan dihapus secara permanen! Tindakan ini tidak dapat dibatalkan.",
+          dataWarningFinalConfirm: "Ya, Ganti Data Saya",
+          dataWarningFinalCancel: "Batal",
         },
       };
 
@@ -1247,34 +1274,134 @@
       const TypewriterModal = ({
         isOpen,
         onConfirm,
-        onCancel
+        onCancel,
+        t
       }) => {
         if (!isOpen) return null;
+        
+        const shareUrl = window.getTypewriterData ? window.getTypewriterData() : null;
+        const fullUrl = shareUrl ? `${window.location.origin}${window.location.pathname}${shareUrl}` : '';
 
         return (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4 animate-fade-in">
-            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-slide-down">
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl animate-slide-down">
               <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-2">
-                "Share your split bill"
+                {t.shareTitle}
               </h3>
-              <p className="text-gray-600 dark:text-gray-300 mb-6">{getTypewriterData}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                {shareUrl ? t.shareDescription : t.shareNoData}
+              </p>
+              {shareUrl && (
+                <textarea
+                  readOnly
+                  value={fullUrl}
+                  onClick={(e) => e.target.select()}
+                  className="w-full px-3 py-2.5 mb-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-500 cursor-text"
+                  rows={3}
+                />
+              )}
               <div className="flex gap-3">
                 <button
                   onClick={onCancel}
                   className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition font-medium"
                 >
-                  {cancelText}
+                  {t.cancel}
                 </button>
                 <button
                   onClick={onConfirm}
-                  className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium"
+                  disabled={!shareUrl}
+                  className="flex-1 px-4 py-2.5 bg-gray-900 dark:bg-gray-600 text-white rounded-lg hover:bg-black dark:hover:bg-gray-500 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {confirmText}
+                  {t.shareCopyButton}
                 </button>
               </div>
             </div>
           </div>
         );
+      };
+
+      // --- DATA WARNING MODAL (Two-Stage) ---
+      const DataWarningModal = ({
+        isOpen,
+        stage,
+        onCopyAndProceed,
+        onProceedWithoutBackup,
+        onFinalConfirm,
+        onCancel,
+        t
+      }) => {
+        if (!isOpen) return null;
+
+        if (stage === 1) {
+          // First warning: Offer to backup current data
+          return (
+            <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-4 animate-fade-in">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl animate-slide-down border-2 border-amber-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-3xl">⚠️</span>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                    {t.dataWarningTitle}
+                  </h3>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-5 leading-relaxed">
+                  {t.dataWarningMessage}
+                </p>
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={onCopyAndProceed}
+                    className="w-full px-4 py-3 bg-gray-900 dark:bg-gray-600 text-white rounded-lg hover:bg-black dark:hover:bg-gray-500 transition font-medium flex items-center justify-center gap-2"
+                  >
+                    <Copy className="w-4 h-4" />
+                    {t.dataWarningCopyButton}
+                  </button>
+                  <button
+                    onClick={onProceedWithoutBackup}
+                    className="w-full px-4 py-3 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 border-2 border-amber-300 dark:border-amber-700 rounded-lg hover:bg-amber-200 dark:hover:bg-amber-900/50 transition font-medium"
+                  >
+                    {t.dataWarningProceed}
+                  </button>
+                  <button
+                    onClick={onCancel}
+                    className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition font-medium text-sm"
+                  >
+                    {t.cancel}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        } else {
+          // Second warning: Final confirmation
+          return (
+            <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 animate-fade-in">
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-slide-down border-2 border-red-500">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-3xl">🚨</span>
+                  <h3 className="text-lg font-bold text-red-600 dark:text-red-400">
+                    {t.dataWarningFinalTitle}
+                  </h3>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-5 leading-relaxed font-medium">
+                  {t.dataWarningFinalMessage}
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={onCancel}
+                    className="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition font-medium"
+                  >
+                    {t.dataWarningFinalCancel}
+                  </button>
+                  <button
+                    onClick={onFinalConfirm}
+                    className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium"
+                  >
+                    {t.dataWarningFinalConfirm}
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        }
       };
 
       // --- MAIN APP ---
@@ -1308,9 +1435,12 @@
         // Load initial data from localStorage or use defaults
         const loadFromStorage = (setLocalStorage = false) => {
           try {
+            // If manual set is requested
             if(setLocalStorage){
               localStorage.setItem(STORAGE_KEY, JSON.stringify(setLocalStorage));
             }
+            
+            // Load from localStorage
             const savedData = localStorage.getItem(STORAGE_KEY);
             if (savedData) {
               const parsed = JSON.parse(savedData);
@@ -1409,7 +1539,106 @@
         const [showResetModal, setShowResetModal] = useState(false);
         const [showTypewriterModal, setShowTypewriterModal] = useState(false);
         const [showWhatsNew, setShowWhatsNew] = useState(false);
+        const [showDataWarning, setShowDataWarning] = useState(false);
+        const [dataWarningStage, setDataWarningStage] = useState(1);
+        const [pendingSharedData, setPendingSharedData] = useState(null);
         const [showBulkInsert, setShowBulkInsert] = useState(false);
+
+        // Check for shared data in URL on mount
+        useEffect(() => {
+          const params = new URLSearchParams(window.location.search);
+          const sharedData = params.get("data");
+          
+          if (sharedData && window.loadTypewriterData) {
+            // Check if there's existing data in localStorage
+            const existingData = localStorage.getItem(STORAGE_KEY);
+            
+            if (existingData) {
+              try {
+                const parsed = JSON.parse(existingData);
+                // Check if there's meaningful data (not just defaults)
+                const hasExistingData = parsed.persons?.length > 0 || 
+                                       parsed.items?.some(item => item.name || item.price);
+                
+                if (hasExistingData) {
+                  // Show warning modal
+                  setPendingSharedData(sharedData);
+                  setShowDataWarning(true);
+                  setDataWarningStage(1);
+                  return;
+                }
+              } catch (error) {
+                console.error("Error parsing existing data:", error);
+              }
+            }
+            
+            // No existing data or empty data, load directly
+            try {
+              const decodedData = window.loadTypewriterData();
+              if (decodedData) {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(decodedData));
+                const newUrl = window.location.origin + window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+                window.location.reload();
+              }
+            } catch (error) {
+              console.error("Error loading shared data:", error);
+            }
+          }
+        }, []);
+
+        // Handler for "Copy My Data Link" button
+        const handleCopyAndProceed = () => {
+          const myDataUrl = window.getTypewriterData ? window.getTypewriterData() : null;
+          if (myDataUrl) {
+            const fullUrl = `${window.location.origin}${window.location.pathname}${myDataUrl}`;
+            navigator.clipboard.writeText(fullUrl).then(() => {
+              setCaptureStatus(t.copied);
+              setTimeout(() => setCaptureStatus(""), 2000);
+            }).catch(() => {
+              setCaptureStatus(t.failedToCopy);
+              setTimeout(() => setCaptureStatus(""), 2000);
+            });
+          }
+          // Move to second stage
+          setDataWarningStage(2);
+        };
+
+        // Handler for "Proceed Without Backup" button
+        const handleProceedWithoutBackup = () => {
+          setDataWarningStage(2);
+        };
+
+        // Handler for final confirmation
+        const handleFinalConfirm = () => {
+          try {
+            const decodedData = window.loadTypewriterData();
+            if (decodedData) {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(decodedData));
+              const newUrl = window.location.origin + window.location.pathname;
+              window.history.replaceState({}, document.title, newUrl);
+              setShowDataWarning(false);
+              window.location.reload();
+            }
+          } catch (error) {
+            console.error("Error loading shared data:", error);
+            setCaptureStatus(t.failedToProcess);
+            setTimeout(() => setCaptureStatus(""), 2000);
+          }
+        };
+
+        // Handler for canceling the warning
+        const handleCancelWarning = () => {
+          setShowDataWarning(false);
+          setDataWarningStage(1);
+          setPendingSharedData(null);
+          // Clean the URL
+          const newUrl = window.location.origin + window.location.pathname;
+          window.history.replaceState({}, document.title, newUrl);
+          // Show notification
+          setCaptureStatus(language === "en" ? "Shared data was not loaded. Your current data is safe." : "Data bersama tidak dimuat. Data Anda saat ini aman.");
+          setTimeout(() => setCaptureStatus(""), 3000);
+        };
         const [bulkInsertText, setBulkInsertText] = useState("");
         const [openAccordions, setOpenAccordions] = useState({});
         const [showOCR, setShowOCR] = useState(false);
@@ -1426,7 +1655,7 @@
         const [roundTo100, setRoundTo100] = useState(
           initialData?.roundTo100 || false,
         );
-        const [showCalculator, setShowCalculator] = useState(true);
+        const [showCalculator, setShowCalculator] = useState(false);
         const [calcDisplay, setCalcDisplay] = useState("0");
         const [calcPrevValue, setCalcPrevValue] = useState(null);
         const [calcOperation, setCalcOperation] = useState(null);
@@ -1437,7 +1666,7 @@
           x: window.innerWidth - 320,
           y: 80,
         });
-        const [showPaymentTracker, setShowPaymentTracker] = useState(true);
+        const [showPaymentTracker, setShowPaymentTracker] = useState(false);
         const [paymentTrackerPos, setPaymentTrackerPos] = useState({
           x: window.innerWidth - 320,
           y: 620,
@@ -2576,7 +2805,7 @@
                           )}
                         </button>
                         <button
-                          onClick={() => setDarkMode(!darkMode)}
+                          onClick={() => setShowTypewriterModal(true)}
                           className="flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
                           title={"Share your split bill summary!"}
                           >
@@ -3684,9 +3913,32 @@
                   cancelText={t.cancel}
                 />
                 <TypewriterModal
-                  isOpen={() => setshowTypewriterModal(true)}
+                  isOpen={showTypewriterModal}
                   onCancel={() => setShowTypewriterModal(false)}
-                  onConfirm={() => setShowTypewriterModal(false)}
+                  onConfirm={() => {
+                    const shareUrl = window.getTypewriterData ? window.getTypewriterData() : null;
+                    if (shareUrl) {
+                      const fullUrl = `${window.location.origin}${window.location.pathname}${shareUrl}`;
+                      navigator.clipboard.writeText(fullUrl).then(() => {
+                        setCaptureStatus(t.copied);
+                        setTimeout(() => setCaptureStatus(""), 2000);
+                      }).catch(() => {
+                        setCaptureStatus(t.failedToCopy);
+                        setTimeout(() => setCaptureStatus(""), 2000);
+                      });
+                    }
+                    setShowTypewriterModal(false);
+                  }}
+                  t={t}
+                />
+                <DataWarningModal
+                  isOpen={showDataWarning}
+                  stage={dataWarningStage}
+                  onCopyAndProceed={handleCopyAndProceed}
+                  onProceedWithoutBackup={handleProceedWithoutBackup}
+                  onFinalConfirm={handleFinalConfirm}
+                  onCancel={handleCancelWarning}
+                  t={t}
                 />
               </div>
             </div>
