@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useApp } from "../context";
 
 export const PeopleSection: React.FC = () => {
@@ -18,6 +18,11 @@ export const PeopleSection: React.FC = () => {
     addPerson,
     removePerson,
   } = useApp();
+
+  const filteredPersons = useMemo(
+    () => persons.filter((p) => p.toLowerCase().includes(personSearch.toLowerCase())),
+    [persons, personSearch],
+  );
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 mb-6 border-2 border-gray-300 dark:border-gray-700 shadow-md">
@@ -110,16 +115,14 @@ export const PeopleSection: React.FC = () => {
               </button>
             )}
           </div>
-          {(() => {
-            const filtered = persons.filter((p) => p.toLowerCase().includes(personSearch.toLowerCase()));
-            return filtered.length === 0 ? (
+          {filteredPersons.length === 0 ? (
               <p className="text-sm text-gray-400 dark:text-gray-500 italic py-3">{t.noSearchResults}</p>
             ) : (
               <ul className="divide-y divide-gray-100 dark:divide-gray-700">
-                {filtered.map((person) => (
+                {filteredPersons.map((person) => (
                   <li key={person} className="flex items-center justify-between py-2.5 px-4">
                     <span className="flex items-center gap-2.5 text-sm font-medium text-gray-900 dark:text-gray-100">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400 dark:text-gray-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="8" r="4" />
                         <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
                       </svg>
@@ -141,8 +144,7 @@ export const PeopleSection: React.FC = () => {
                   </li>
                 ))}
               </ul>
-            );
-          })()}
+            )}
         </>
       )}
     </div>

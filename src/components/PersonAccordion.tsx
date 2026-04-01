@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useApp } from "../context";
 import { ChevronDown } from "../icons";
 import { formatMoney, formatMoneySplit, roundToNearest100 } from "../utils/formatters";
+import { calculateItemDisplayPrice } from "../utils/calculator";
 
 interface PersonAccordionProps {
   person: string;
@@ -10,21 +11,32 @@ interface PersonAccordionProps {
 export const PersonAccordion: React.FC<PersonAccordionProps> = ({ person }) => {
   const {
     t,
-    items,
     persons,
     openAccordions,
     toggleAccordion,
     getPersonItems,
     splitResult,
     roundTo100,
-    taxType,
-    tax,
     voucher,
   } = useApp();
 
   const { subtotal, taxAmount, sharedFees, personSubtotals, personTotals } = splitResult;
   const isOpen = openAccordions[person] || false;
   const personItems = getPersonItems(person);
+
+  const itemRows = useMemo(
+    () =>
+      personItems
+        .map((item) => {
+          const displayPrice = calculateItemDisplayPrice(item, person);
+          if (displayPrice === null) return null;
+          const quantity = Number(item.persons[person] || 0);
+          const totalPortions = Object.values(item.persons).reduce((s, q) => s + (Number(q) || 0), 0);
+          return { item, displayPrice, quantity, totalPortions };
+        })
+        .filter(Boolean),
+    [personItems, person],
+  );
 
   return (
     <div className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 overflow-hidden">
@@ -36,7 +48,7 @@ export const PersonAccordion: React.FC<PersonAccordionProps> = ({ person }) => {
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="font-medium text-gray-700 dark:text-gray-200 truncate">{person}</span>
           <button
-            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition flex-shrink-0"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition shrink-0"
             onClick={(e) => {
               e.stopPropagation();
               toggleAccordion(person);
@@ -45,30 +57,21 @@ export const PersonAccordion: React.FC<PersonAccordionProps> = ({ person }) => {
             <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`} />
           </button>
         </div>
-        <span className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 font-mono whitespace-nowrap flex-shrink-0 ml-4">
+        <span className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 font-mono whitespace-nowrap shrink-0 ml-4">
           Rp {formatMoneySplit(roundTo100 ? roundToNearest100(personTotals[person] || 0) : personTotals[person] || 0)}
         </span>
       </div>
       {isOpen && (
         <div className="border-t border-gray-100 dark:border-gray-600 p-3 bg-gray-50 dark:bg-gray-800">
           <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">{t.orderDetails}</div>
-          {personItems.length === 0 ? (
+          {itemRows.length === 0 ? (
             <p className="text-xs text-gray-400 dark:text-gray-500 italic">{t.noItems}</p>
           ) : (
             <div className="space-y-3">
               <div className="space-y-2">
-                {personItems.map((item) => {
-                  const itemPrice = Number(item.price || 0);
-                  const quantity = Number(item.persons[person] || 0);
-                  if (quantity === 0 || itemPrice === 0) return null;
-                  let displayPrice: number;
-                  if (item.priceType === "total") {
-                    const tp = Object.values(item.persons).reduce((s, q) => s + (Number(q) || 0), 0);
-                    if (tp === 0) return null;
-                    displayPrice = (itemPrice / tp) * quantity;
-                  } else {
-                    displayPrice = itemPrice * quantity;
-                  }
+                {itemRows.map((row) => {
+                  if (!row) return null;
+                  const { item, displayPrice, quantity, totalPortions } = row;
                   return (
                     <div key={item.id} className="flex justify-between items-start gap-2 text-xs">
                       <div className="flex-1 min-w-0">
@@ -78,11 +81,11 @@ export const PersonAccordion: React.FC<PersonAccordionProps> = ({ person }) => {
                         </div>
                         {item.priceType === "total" && (
                           <div className="text-gray-400 dark:text-gray-500 text-xs">
-                            {t.priceTotal}: Rp {formatMoney(itemPrice)} ÷ {Object.values(item.persons).reduce((s, q) => s + (Number(q) || 0), 0)} portions
+                            {t.priceTotal}: Rp {formatMoney(Number(item.price || 0))} ÷ {totalPortions} portions
                           </div>
                         )}
                       </div>
-                      <span className="font-mono text-gray-600 dark:text-gray-300 whitespace-nowrap flex-shrink-0">
+                      <span className="font-mono text-gray-600 dark:text-gray-300 whitespace-nowrap shrink-0">
                         Rp {formatMoney(displayPrice)}
                       </span>
                     </div>

@@ -34,7 +34,7 @@ export const WhatsNewModal: React.FC = () => {
                 <ul className="space-y-1.5">
                   {ci.map((item, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
-                      <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-gray-400 dark:bg-gray-500" />
+                      <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 bg-gray-400 dark:bg-gray-500" />
                       <span>{item}</span>
                     </li>
                   ))}

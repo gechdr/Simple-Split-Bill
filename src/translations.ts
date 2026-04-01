@@ -13,6 +13,8 @@ export interface Translations {
   items: string;
   noteTitle: string;
   noteDesc: string;
+  placeRestoName: string;
+  placeRestoPlaceholder: string;
   peopleList: string;
   personNamePlaceholder: string;
   add: string;
@@ -98,6 +100,7 @@ export interface Translations {
   tooltipPriceTotal: string;
   tooltipPersonSelect: string;
   tooltipPersonName: string;
+  tooltipPlaceResto: string;
   tooltipItemName: string;
   tooltipItemPrice: string;
   tooltipShipping: string;
@@ -164,6 +167,8 @@ export const translations: TranslationSet = {
     noteTitle: "Note:",
     noteDesc:
       "The receipt scanning feature uses OCR and may not be 100% accurate. Please double-check the detected data before using it.",
+    placeRestoName: "Place / Resto Name",
+    placeRestoPlaceholder: "e.g. Sushi Tei Central Park",
     peopleList: "People List",
     personNamePlaceholder: "Person name (Press Enter)",
     add: "Add",
@@ -253,6 +258,7 @@ export const translations: TranslationSet = {
     tooltipPersonSelect:
       "Click to include/exclude this person for this item",
     tooltipPersonName: "Enter person's name and press Enter to add",
+    tooltipPlaceResto: "Enter place or restaurant name for this bill",
     tooltipItemName: "Enter the name of the item",
     tooltipItemPrice: "Enter the price amount (numbers only)",
     tooltipShipping: "Enter shipping/delivery cost",
@@ -314,6 +320,8 @@ export const translations: TranslationSet = {
     noteTitle: "Catatan:",
     noteDesc:
       "Fitur pemindaian struk menggunakan OCR dan mungkin tidak 100% akurat. Mohon periksa kembali data yang terdeteksi sebelum digunakan.",
+    placeRestoName: "Nama Tempat / Resto",
+    placeRestoPlaceholder: "contoh: Sushi Tei Central Park",
     peopleList: "Daftar Orang",
     personNamePlaceholder: "Nama orang (Tekan Enter)",
     add: "Tambah",
@@ -405,6 +413,7 @@ export const translations: TranslationSet = {
       "Klik untuk sertakan/kecualikan orang ini untuk barang ini",
     tooltipPersonName:
       "Masukkan nama orang dan tekan Enter untuk menambah",
+    tooltipPlaceResto: "Masukkan nama tempat atau resto untuk tagihan ini",
     tooltipItemName: "Masukkan nama barang",
     tooltipItemPrice: "Masukkan jumlah harga (angka saja)",
     tooltipShipping: "Masukkan biaya ongkos kirim",

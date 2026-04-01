@@ -1,5 +1,22 @@
 import type { BillItem, SplitResult, TaxType } from "../types";
 
+/**
+ * Returns the display price for a person's share of an item,
+ * accounting for unit vs total price type. Returns null if the
+ * person has no quantity or the item has no price.
+ */
+export function calculateItemDisplayPrice(item: BillItem, person: string): number | null {
+  const itemPrice = Number(item.price || 0);
+  const quantity = Number(item.persons[person] || 0);
+  if (quantity === 0 || itemPrice === 0) return null;
+  if (item.priceType === "total") {
+    const totalPortions = Object.values(item.persons).reduce((s, q) => s + (Number(q) || 0), 0);
+    if (totalPortions === 0) return null;
+    return (itemPrice / totalPortions) * quantity;
+  }
+  return itemPrice * quantity;
+}
+
 interface CalculateSplitInput {
   items: BillItem[];
   persons: string[];

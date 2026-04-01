@@ -7,6 +7,7 @@ import { PersonAccordion } from "./PersonAccordion";
 export const PaymentSummary: React.FC = () => {
   const {
     t,
+    placeName,
     persons,
     taxType,
     tax,
@@ -35,6 +36,16 @@ export const PaymentSummary: React.FC = () => {
               {t.paymentSummary}
             </h2>
           </div>
+          {placeName?.trim() && (
+            <div className="mb-5 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-3">
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-300 mb-1">
+                {t.placeRestoName}
+              </p>
+              <p className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 break-words">
+                {placeName.trim()}
+              </p>
+            </div>
+          )}
           <div className="space-y-3 mb-5 text-sm border-b border-gray-300 dark:border-gray-600 pb-4">
             <div className="flex justify-between items-center gap-4">
               <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">{t.orderSubtotal}</span>
@@ -69,7 +80,7 @@ export const PaymentSummary: React.FC = () => {
           {selectedAccount && selectedAccount !== "CUSTOM" && (
             <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl p-4 sm:p-5 mb-5">
               <div className="flex items-center gap-2 mb-2 text-gray-500 dark:text-gray-400">
-                <CreditCard className="w-4 h-4 flex-shrink-0" />
+                <CreditCard className="w-4 h-4 shrink-0" />
                 <span className="text-xs font-bold uppercase tracking-wider whitespace-nowrap">{t.transferTo} {getSelectedAccountName()}</span>
               </div>
               <div className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight whitespace-nowrap">

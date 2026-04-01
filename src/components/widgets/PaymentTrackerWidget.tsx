@@ -2,7 +2,8 @@ import { useApp } from "../../context";
 import { Copy, ListChecks } from "../../icons";
 
 export function PaymentTrackerWidget() {
-  const { t, persons, paymentStatus, togglePayment, handlePaymentCopy, paymentTrackerRef, dragWidget, splitResult, formatMoneySplit, showPaymentTracker, setShowPaymentTracker } = useApp();
+  const { t, persons, paymentStatus, togglePayment, clipboard, paymentTrackerRef, dragWidget, splitResult, formatMoneySplit, showPaymentTracker, setShowPaymentTracker } = useApp();
+  const { handlePaymentCopy, paymentCopyStatus } = clipboard;
   const { paymentTrackerPos, handleDragStart, resetPaymentTrackerPos } = dragWidget;
 
   if (!showPaymentTracker) return null;
@@ -60,7 +61,7 @@ export function PaymentTrackerWidget() {
                             >
                               {person}
                             </span>
-                            <span className="text-xs font-mono flex-shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                            <span className="text-xs font-mono shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
                               Rp{" "}
                               {formatMoneySplit(
                                 splitResult.personTotals[person] || 0,
@@ -87,7 +88,7 @@ export function PaymentTrackerWidget() {
                             <span className="flex-1 min-w-0 text-sm font-medium truncate text-gray-400 dark:text-gray-500 line-through">
                               {person}
                             </span>
-                            <span className="text-xs font-mono flex-shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
+                            <span className="text-xs font-mono shrink-0 whitespace-nowrap text-gray-500 dark:text-gray-400">
                               Rp{" "}
                               {formatMoneySplit(
                                 splitResult.personTotals[person] || 0,
@@ -111,11 +112,12 @@ export function PaymentTrackerWidget() {
         <div className="px-3 pb-3">
           <button
             onClick={handlePaymentCopy}
+            disabled={!!paymentCopyStatus && paymentCopyStatus === t.processing}
             className="w-full bg-gray-900 dark:bg-gray-700 text-white py-2 rounded-lg hover:bg-black dark:hover:bg-gray-600 transition flex items-center justify-center gap-2 text-sm font-medium"
             title={t.tooltipCopy}
           >
             <Copy className="w-4 h-4" />
-            {t.copyImage}
+            {paymentCopyStatus || t.copyImage}
           </button>
         </div>
       </div>

@@ -22,7 +22,9 @@ export const FormattedInput: React.FC<FormattedInputProps> = ({
     onChange(rawValue);
   };
 
-  const displayValue = value ? Number(value).toLocaleString("id-ID") : "";
+  const displayValue = value
+    ? Number(value).toLocaleString("id-ID", { maximumFractionDigits: 0 })
+    : "";
 
   return (
     <div>

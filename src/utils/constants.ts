@@ -3,7 +3,13 @@ import type { BillItem, BankAccount } from "../types";
 export const STORAGE_KEY = "splitBillData";
 export const LANGUAGE_KEY = "splitBillLanguage";
 export const VERSION_KEY = "splitBillSeenVersion";
-export const APP_VERSION = "v2.8.0";
+export const APP_VERSION = "v2.8.1";
+
+export const WIDGET_DEFAULT_OFFSET = 320;
+export const NOTIFICATION_DURATION_MS = 2000;
+export const OCR_COMPLETION_DELAY_MS = 3000;
+export const IMAGE_SCALE_SUMMARY = 5;
+export const IMAGE_SCALE_TRACKER = 3;
 
 export const DEFAULT_ITEM: BillItem = {
   id: 1,
@@ -22,20 +28,18 @@ export const DEFAULT_BANK_ACCOUNT: BankAccount = {
 export const changelog = {
   en: {
     new: [
-      "Bulk Insert — paste a list of Person : Item entries to add people and items at once",
+      "Migrate to React project",
+      "Added Place / Resto Name field to label what the split bill is for",
     ],
-    improved: [
-      "People List redesigned with search, duplicate validation, and autocomplete",
-    ],
+    improved: [],
     removed: [],
   },
   id: {
     new: [
-      "Masukkan Massal — tempel daftar Orang : Barang untuk menambah orang dan barang sekaligus",
+      "Migrasi ke project React",
+      "Menambahkan kolom Nama Tempat / Resto untuk menandai tagihan ini untuk apa",
     ],
-    improved: [
-      "Daftar Orang didesain ulang dengan pencarian, validasi duplikat, dan autocomplete",
-    ],
+    improved: [],
     removed: [],
   },
 };

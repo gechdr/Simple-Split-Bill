@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Position } from "../types";
+import { WIDGET_DEFAULT_OFFSET } from "../utils/constants";
 
 interface DragState {
-  isDraggingWidget: string | null;
+  draggingWidgetId: string | null;
   dragOffset: Position;
   clockPos: Position;
   calcPos: Position;
@@ -11,29 +12,29 @@ interface DragState {
 
 export function useDragWidget() {
   const [state, setState] = useState<DragState>(() => ({
-    isDraggingWidget: null,
+    draggingWidgetId: null,
     dragOffset: { x: 0, y: 0 },
     clockPos: { x: 24, y: 80 },
-    calcPos: { x: typeof window !== "undefined" ? window.innerWidth - 320 : 1000, y: 80 },
-    paymentTrackerPos: { x: typeof window !== "undefined" ? window.innerWidth - 320 : 1000, y: 620 },
+    calcPos: { x: typeof window !== "undefined" ? window.innerWidth - WIDGET_DEFAULT_OFFSET : WIDGET_DEFAULT_OFFSET, y: 80 },
+    paymentTrackerPos: { x: typeof window !== "undefined" ? window.innerWidth - WIDGET_DEFAULT_OFFSET : WIDGET_DEFAULT_OFFSET, y: 620 },
   }));
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       setState((prev) => {
-        if (!prev.isDraggingWidget) return prev;
-        if (prev.isDraggingWidget === "clock") {
+        if (!prev.draggingWidgetId) return prev;
+        if (prev.draggingWidgetId === "clock") {
           return { ...prev, clockPos: { x: e.clientX - prev.dragOffset.x, y: e.clientY - prev.dragOffset.y } };
-        } else if (prev.isDraggingWidget === "calc") {
+        } else if (prev.draggingWidgetId === "calc") {
           return { ...prev, calcPos: { x: e.clientX - prev.dragOffset.x, y: e.clientY - prev.dragOffset.y } };
-        } else if (prev.isDraggingWidget === "payment") {
+        } else if (prev.draggingWidgetId === "payment") {
           return { ...prev, paymentTrackerPos: { x: e.clientX - prev.dragOffset.x, y: e.clientY - prev.dragOffset.y } };
         }
         return prev;
       });
     };
-    const handleMouseUp = () => setState((prev) => ({ ...prev, isDraggingWidget: null }));
-    if (state.isDraggingWidget) {
+    const handleMouseUp = () => setState((prev) => ({ ...prev, draggingWidgetId: null }));
+    if (state.draggingWidgetId) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
       return () => {
@@ -41,12 +42,12 @@ export function useDragWidget() {
         document.removeEventListener("mouseup", handleMouseUp);
       };
     }
-  }, [state.isDraggingWidget]);
+  }, [state.draggingWidgetId]);
 
   const handleDragStart = useCallback((widget: string, e: React.MouseEvent) => {
     setState((prev) => ({
       ...prev,
-      isDraggingWidget: widget,
+      draggingWidgetId: widget,
       dragOffset: {
         x: e.clientX - (widget === "clock" ? prev.clockPos.x : widget === "calc" ? prev.calcPos.x : prev.paymentTrackerPos.x),
         y: e.clientY - (widget === "clock" ? prev.clockPos.y : widget === "calc" ? prev.calcPos.y : prev.paymentTrackerPos.y),
@@ -55,13 +56,13 @@ export function useDragWidget() {
   }, []);
 
   const handleDragEnd = useCallback(() => {
-    setState((prev) => ({ ...prev, isDraggingWidget: null }));
+    setState((prev) => ({ ...prev, draggingWidgetId: null }));
   }, []);
 
   const resetCalcPos = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      calcPos: { x: window.innerWidth - 320, y: 80 },
+      calcPos: { x: window.innerWidth - WIDGET_DEFAULT_OFFSET, y: 80 },
     }));
   }, []);
 
@@ -75,12 +76,12 @@ export function useDragWidget() {
   const resetPaymentTrackerPos = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      paymentTrackerPos: { x: window.innerWidth - 320, y: 620 },
+      paymentTrackerPos: { x: window.innerWidth - WIDGET_DEFAULT_OFFSET, y: 620 },
     }));
   }, []);
 
   return {
-    isDraggingWidget: state.isDraggingWidget,
+    draggingWidgetId: state.draggingWidgetId,
     dragOffset: state.dragOffset,
     clockPos: state.clockPos,
     calcPos: state.calcPos,

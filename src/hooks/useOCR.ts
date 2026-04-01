@@ -3,6 +3,7 @@ import { recognize } from "tesseract.js";
 import { parseReceiptText } from "../utils/receiptParser";
 import type { BillItem } from "../types";
 import type { Translations } from "../translations";
+import { OCR_COMPLETION_DELAY_MS, NOTIFICATION_DURATION_MS } from "../utils/constants";
 
 interface UseOCRInput {
   t: Translations;
@@ -60,7 +61,7 @@ export function useOCR({
         setIsScanning(false);
         setScanProgress(0);
         setCaptureStatus("");
-      }, 3000);
+      }, OCR_COMPLETION_DELAY_MS);
     },
     [t, setItems, setTax, setBiayaLayanan, setOngkir, setDiskon, setVoucher],
   );
@@ -91,7 +92,7 @@ export function useOCR({
         if (file.type.startsWith("image/")) handleScanReceipt(file);
         else {
           setCaptureStatus(t.fileMustBeImage);
-          setTimeout(() => setCaptureStatus(""), 2000);
+          setTimeout(() => setCaptureStatus(""), NOTIFICATION_DURATION_MS);
         }
       }
     },

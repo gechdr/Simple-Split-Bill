@@ -1,5 +1,6 @@
 import { useApp } from "./context";
 import { Header } from "./components/Header";
+import { BillInfoSection } from "./components/BillInfoSection";
 import { OCRZone } from "./components/OCRZone";
 import { PeopleSection } from "./components/PeopleSection";
 import { ItemsSection } from "./components/ItemsSection";
@@ -21,6 +22,7 @@ function SplitBill() {
       <div className="max-w-4xl mx-auto">
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-8 border border-gray-300 dark:border-gray-700 transition-colors">
           <Header />
+          <BillInfoSection />
           <OCRZone />
           <PeopleSection />
           <ItemsSection />

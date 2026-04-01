@@ -1,4 +1,5 @@
 export { Header } from "./Header";
+export { BillInfoSection } from "./BillInfoSection";
 export { OCRZone } from "./OCRZone";
 export { PeopleSection } from "./PeopleSection";
 export { ItemCard } from "./ItemCard";

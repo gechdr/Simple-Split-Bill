@@ -2,6 +2,7 @@ import React from "react";
 import { useApp } from "../context";
 import { Trash2, GripVertical } from "../icons";
 import { FormattedInput } from "./FormattedInput";
+import { formatMoney } from "../utils/formatters";
 import type { BillItem } from "../types";
 
 interface ItemCardProps {
@@ -25,11 +26,6 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index }) => {
     draggedItem,
     dragOverIndex,
   } = useApp();
-
-  const formatMoney = (amount: number | string) => {
-    const num = Number(amount);
-    return isNaN(num) || !isFinite(num) ? "0" : num.toLocaleString("id-ID");
-  };
 
   return (
     <div
@@ -61,7 +57,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index }) => {
         </div>
         <button
           onClick={() => removeItem(item.id)}
-          className="p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition shadow-sm h-[46px] w-[46px] sm:h-[42px] sm:w-[42px] flex items-center justify-center shrink-0"
+          className="p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-800 transition shadow-sm h-11.5 w-11.5 sm:h-10.5 sm:w-10.5 flex items-center justify-center shrink-0"
           title={t.tooltipDeleteItem}
         >
           <Trash2 className="w-5 h-5" />
@@ -142,7 +138,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index }) => {
                         className="flex items-center gap-3 flex-1 text-left min-w-0"
                         title={t.tooltipPersonSelect}
                       >
-                        <span className={`w-4 h-4 rounded flex-shrink-0 border-2 flex items-center justify-center transition ${isSelected ? "bg-gray-900 border-gray-900 dark:bg-gray-500 dark:border-gray-500" : "border-gray-300 dark:border-gray-600"}`}>
+                        <span className={`w-4 h-4 rounded shrink-0 border-2 flex items-center justify-center transition ${isSelected ? "bg-gray-900 border-gray-900 dark:bg-gray-500 dark:border-gray-500" : "border-gray-300 dark:border-gray-600"}`}>
                           {isSelected && (
                             <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="1.5,6 4.5,9.5 10.5,2.5" />
@@ -154,7 +150,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index }) => {
                         </span>
                       </button>
                       {isSelected && (
-                        <div className="flex items-center gap-1 flex-shrink-0">
+                        <div className="flex items-center gap-1 shrink-0">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();

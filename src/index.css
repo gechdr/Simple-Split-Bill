@@ -29,3 +29,13 @@ select,
 textarea {
   font-size: 16px;
 }
+
+button,
+[role="button"] {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}

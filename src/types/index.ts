@@ -13,6 +13,7 @@ export interface BankAccount {
 }
 
 export interface SavedData {
+  placeName: string;
   items: BillItem[];
   persons: string[];
   ongkir: string;

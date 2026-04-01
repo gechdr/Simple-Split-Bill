@@ -1,6 +1,8 @@
 export function formatMoney(amount: number | string): string {
   const num = Number(amount);
-  return isNaN(num) || !isFinite(num) ? "0" : num.toLocaleString("id-ID");
+  return isNaN(num) || !isFinite(num)
+    ? "0"
+    : num.toLocaleString("id-ID", { maximumFractionDigits: 0 });
 }
 
 export function formatMoneySplit(amount: number | string): string {
@@ -11,7 +13,8 @@ export function formatMoneySplit(amount: number | string): string {
 }
 
 export function roundToNearest100(amount: number): number {
-  return Math.round(amount / 100) * 100;
+  const sign = amount < 0 ? -1 : 1;
+  return sign * Math.round(Math.abs(amount) / 100) * 100;
 }
 
 export function formatCalcDisplay(value: string): string {
