@@ -2,16 +2,14 @@
 
 ## Project Overview
 
-Vite + React 18 + TypeScript application for splitting bills among groups. All dependencies installed via npm (no CDN).
+Vite + React 19 + TypeScript application for splitting bills among groups. All dependencies installed via npm (no CDN).
 
-**Tech Stack**: React 18, TypeScript, Vite, Tailwind CSS v4, Tesseract.js (OCR), dom-to-image-more (export).
+**Tech Stack**: React 19, TypeScript, Vite 8, Tailwind CSS v4, Tesseract.js (OCR), dom-to-image (export).
 
 ## Commands
 
 ### Development
 ```bash
-cd vite-split-bill
-
 # Start dev server
 npm run dev
 
@@ -25,24 +23,26 @@ npm run preview
 ### Testing / Linting
 - **No test framework** — manual testing in browser only
 - **No linter** — no ESLint or Prettier config
-- TypeScript strict mode is **disabled** (`strict: false` in tsconfig) to match the original codebase
+- TypeScript strict mode is **disabled** (`strict: false` in tsconfig)
 
 To verify changes, run `npm run dev` and test all features manually in the browser.
 
 ## Project Structure
 
 ```
-vite-split-bill/
-├── index.html                  # Entry HTML (Google Fonts only, no CDN libs)
+split-bill/
+├── index.html                  # Entry HTML (Vite, Google Fonts only)
+├── index.copy.html             # Original single-file app (legacy)
 ├── package.json
 ├── vite.config.ts              # Vite + React + Tailwind plugins
 ├── tsconfig.json
+├── AGENTS.md
 └── src/
     ├── main.tsx                # React root entry point
     ├── App.tsx                 # Root component
-    ├── SplitBill.tsx           # Main application component (~680 lines)
+    ├── SplitBill.tsx           # Main application component
     ├── translations.ts         # EN/ID translation strings + types
-    ├── index.css               # Tailwind import + custom animations
+    ├── index.css               # Tailwind import + dark mode variant + animations
     ├── vite-env.d.ts           # Vite type declarations
     ├── types/
     │   └── index.ts            # TypeScript interfaces (BillItem, BankAccount, etc.)
@@ -65,9 +65,9 @@ vite-split-bill/
 - All dependencies from npm (no CDN):
   - `react`, `react-dom` — UI framework
   - `tesseract.js` — OCR engine
-  - `dom-to-image-more` — image export (fork of dom-to-image)
+  - `dom-to-image` — image export
   - `tailwindcss`, `@tailwindcss/vite` — styling
-- Destructure React hooks: `const { useState, useEffect, useRef } = React;`
+- Use ES module imports with `.tsx`/`.ts` extensions omitted
 
 ### Naming Conventions
 - **Components**: PascalCase (`SplitBill`, `AccountSelector`, `ConfirmModal`)
@@ -86,11 +86,12 @@ vite-split-bill/
 
 ### Styling
 - **Tailwind CSS v4** via `@tailwindcss/vite` plugin
-- Dark mode via `class` strategy (`dark:` prefix)
+- Dark mode via `class` strategy — configured with `@custom-variant dark (&:where(.dark, .dark *));` in `index.css`
 - Responsive: `sm:` prefix for mobile-first
 - Custom animations: `animate-slide-down`, `animate-fade-in` (defined in `index.css`)
 - Common patterns: `rounded-xl`, `shadow-lg`, `border`, `transition`, `focus:ring-1`
 - Use `text-base sm:text-sm` for inputs to prevent iOS zoom
+- Font: Google Fonts Roboto
 
 ### Formatting
 - **2-space indentation**

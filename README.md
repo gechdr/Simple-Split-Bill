@@ -2,10 +2,12 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-2.4.1-blue.svg)
+![Version](https://img.shields.io/badge/version-2.8.0-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
-![React](https://img.shields.io/badge/React-18-61DAFB.svg?logo=react)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-38B2AC.svg?logo=tailwind-css)
+![React](https://img.shields.io/badge/React-19-61DAFB.svg?logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC.svg?logo=tailwind-css)
+![Vite](https://img.shields.io/badge/Vite-8.x-646CFF.svg?logo=vite)
 
 **Split bills easily and fairly among friends, family, or colleagues.**
 
@@ -19,7 +21,9 @@
 
 Split Bill is a modern, feature-rich web application designed to make splitting expenses effortless. Whether you're dividing a restaurant bill, sharing vacation costs, or managing group purchases, Split Bill handles all the complex calculations so you don't have to.
 
-Built with React and Tailwind CSS, it offers a clean, responsive interface that works seamlessly on both desktop and mobile devices.
+Built with **React 19**, **TypeScript**, **Vite**, and **Tailwind CSS v4**, it offers a clean, responsive interface that works seamlessly on both desktop and mobile devices.
+
+> **Note**: The original single-file version (`index.copy.html`) is still available in the repository for reference. The current version uses a modern Vite + React + TypeScript architecture.
 
 ## ✨ Features
 
@@ -76,41 +80,43 @@ Built with React and Tailwind CSS, it offers a clean, responsive interface that 
 ### Desktop Widgets
 
 - 🧮 **Floating Calculator** - Built-in calculator for quick math
-- 🕐 **Analog Clock** - Draggable clock widget with digital display
+- ✅ **Payment Tracker** - Track who has paid and who hasn't
+- 🔤 **Bulk Insert** - Paste a list of Person : Item entries to add people and items at once
 
 ## 🚀 Installation
 
-### Option 1: Direct Use (No Installation)
-
-Simply open the HTML file in any modern web browser - no server required!
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/split-bill.git
-
-# Open the file
-open index.html
-# or double-click index.html in your file explorer
-```
-
-### Option 2: Local Development Server
+### Option 1: Vite Development (Recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/split-bill.git
 cd split-bill
 
-# Using Python
-python -m http.server 8080
+# Install dependencies
+npm install
 
-# Using Node.js (with http-server)
-npx http-server
-
-# Using PHP
-php -S localhost:8080
+# Start development server
+npm run dev
 ```
 
-Then open `http://localhost:8080` in your browser.
+Open `http://localhost:5173` in your browser.
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/split-bill.git
+```
+
+### Option 2: Build for Production
+
+```bash
+# Build optimized production files
+npm run build
+
+# Preview the production build locally
+npm run preview
+```
+
+The built files will be in the `dist/` directory, ready to deploy to any static hosting.
 
 ### Option 3: Deploy to GitHub Pages
 
@@ -164,37 +170,73 @@ Then open `http://localhost:8080` in your browser.
 4. Review and adjust detected items
 ```
 
-#### Exporting Results
+### Bulk Insert
 
 ```
-1. Scroll to the Payment Summary section
-2. Click "Download" to save as PNG
-3. Or click "Copy Image" to copy to clipboard
-4. Share via WhatsApp, Telegram, or any messaging app
+1. Click "Bulk Insert" in the People List section
+2. Enter entries in the format "Person : Item" (one per line)
+3. Click "Insert" — people and items are added automatically
 ```
+
+### Using Desktop Widgets
+
+On desktop screens, three floating widgets are available:
+
+- **Calculator** — quick math operations
+- **Clock** — analog + digital time display
+- **Payment Tracker** — mark who has paid
+
+All widgets are draggable and can be toggled from the header toolbar.
 
 ## 🛠️ Tech Stack
 
 | Technology | Purpose |
 |------------|---------|
-| [React 18](https://reactjs.org/) | UI Framework |
-| [Tailwind CSS](https://tailwindcss.com/) | Styling |
+| [React 19](https://reactjs.org/) | UI Framework |
+| [TypeScript](https://www.typescriptlang.org/) | Type Safety |
+| [Vite](https://vitejs.dev/) | Build Tool & Dev Server |
+| [Tailwind CSS v4](https://tailwindcss.com/) | Styling |
 | [Tesseract.js](https://tesseract.projectnaptha.com/) | OCR Engine |
 | [dom-to-image](https://github.com/tsayen/dom-to-image) | Image Export |
-| [Babel Standalone](https://babeljs.io/) | JSX Transformation |
+| [Google Fonts - Roboto](https://fonts.google.com/specimen/Roboto) | Typography |
 
 ## 📂 Project Structure
 
 ```
 split-bill/
-├── index.html          # Main application file (single-file app)
-├── README.md           # Documentation
-├── LICENSE             # MIT License
-└── screenshots/        # Application screenshots
-    ├── desktop.png
-    ├── mobile.png
-    └── dark-mode.png
+├── index.html              # Entry HTML (Vite)
+├── index.copy.html         # Original single-file app (legacy)
+├── package.json
+├── vite.config.ts          # Vite + React + Tailwind config
+├── tsconfig.json
+├── AGENTS.md               # Guidelines for AI coding agents
+├── README.md
+├── public/                 # Static assets
+├── dist/                   # Production build output
+└── src/
+    ├── main.tsx            # React root entry point
+    ├── App.tsx             # Root component
+    ├── SplitBill.tsx       # Main application component
+    ├── translations.ts     # EN/ID translation strings + types
+    ├── index.css           # Tailwind import + custom animations
+    ├── vite-env.d.ts       # Vite type declarations
+    ├── types/
+    │   └── index.ts        # TypeScript interfaces
+    ├── icons/
+    │   └── index.tsx       # SVG icon components (22 icons)
+    └── components/
+        ├── FormattedInput.tsx   # Currency/percentage input
+        ├── AccountSelector.tsx  # Bank account dropdown + modal
+        └── ConfirmModal.tsx     # Confirmation dialog
 ```
+
+## 📝 Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite development server |
+| `npm run build` | Build for production (TypeScript + Vite) |
+| `npm run preview` | Preview production build locally |
 
 ## 🔧 Configuration
 
@@ -244,11 +286,11 @@ Contributions are welcome! Here's how you can help:
 
 ### Development Guidelines
 
-- Keep the single-file architecture for easy deployment
 - Maintain responsive design for all screen sizes
 - Test in both light and dark modes
-- Ensure all text is translatable
-- Follow existing code style and formatting
+- Ensure all text is translatable (add to both EN and ID in `translations.ts`)
+- Follow existing code style and TypeScript conventions
+- When adding state, include it in the `dataToSave` object for localStorage persistence
 
 ### Feature Ideas
 
@@ -263,7 +305,17 @@ Contributions are welcome! Here's how you can help:
 
 ## 📝 Changelog
 
-### v2.4.1 (Current)
+### v2.8.0 (Current)
+- Migrated to Vite + React 19 + TypeScript
+- Replaced CDN dependencies with npm packages
+- Component-based architecture (icons, components, types, translations)
+- Added Bulk Insert feature for quick person/item entry
+- Added Payment Tracker widget
+- Improved dark mode with class-based strategy
+- Enhanced People List with search, autocomplete, and duplicate detection
+- Google Fonts Roboto typography
+
+### v2.4.1
 - Added floating calculator widget
 - Added analog clock widget
 - Improved drag-and-drop for items
@@ -292,7 +344,7 @@ No, all data is stored locally in your browser's localStorage. Nothing is sent t
 <details>
 <summary><strong>Can I use this offline?</strong></summary>
 
-The app requires an internet connection for initial load (to fetch React, Tailwind, and Tesseract.js from CDN). After loading, most features work offline except OCR scanning.
+The app is now a Vite + React + TypeScript project requiring npm install. After loading, most features work offline except OCR scanning.
 </details>
 
 <details>
