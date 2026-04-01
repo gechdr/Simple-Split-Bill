@@ -31,7 +31,7 @@ To verify changes, run `npm run dev` and test all features manually in the brows
 
 ```
 split-bill/
-├── index.html                  # Entry HTML (Vite, Google Fonts only)
+├── index.html                  # Entry HTML (Vite, Google Fonts Roboto)
 ├── index.copy.html             # Original single-file app (legacy)
 ├── package.json
 ├── vite.config.ts              # Vite + React + Tailwind plugins
@@ -39,27 +39,58 @@ split-bill/
 ├── AGENTS.md
 └── src/
     ├── main.tsx                # React root entry point
-    ├── App.tsx                 # Root component
-    ├── SplitBill.tsx           # Main application component
-    ├── translations.ts         # EN/ID translation strings + types
+    ├── App.tsx                 # Wraps SplitBill in AppProvider
+    ├── SplitBill.tsx           # Thin composition layer (no state/logic)
+    ├── translations.ts         # EN/ID translation strings + Translations type
     ├── index.css               # Tailwind import + dark mode variant + animations
     ├── vite-env.d.ts           # Vite type declarations
     ├── types/
     │   └── index.ts            # TypeScript interfaces (BillItem, BankAccount, etc.)
     ├── icons/
     │   └── index.tsx           # All SVG icon components (22 icons)
+    ├── context/
+    │   └── AppContext.tsx      # Centralized state via React Context + useApp hook
+    ├── hooks/
+    │   ├── useLocalStorage.ts  # Generic localStorage persistence
+    │   ├── useBillCalculator.ts# Split calculation logic
+    │   ├── useDarkMode.ts      # Dark mode toggle with persistence
+    │   ├── useLanguage.ts      # Language toggle with translations
+    │   ├── useCalculator.ts    # Floating calculator widget state
+    │   ├── useClipboard.ts     # Image capture (download/copy)
+    │   ├── useDragWidget.ts    # Draggable widget positioning
+    │   └── useOCR.ts           # Receipt scanning with Tesseract.js
+    ├── utils/
+    │   ├── constants.ts        # App constants, defaults, changelog
+    │   ├── formatters.ts       # Money/calc display formatters
+    │   └── receiptParser.ts    # OCR text parsing
     └── components/
         ├── FormattedInput.tsx  # Currency/percentage input with Rp/% prefix
         ├── AccountSelector.tsx # Bank account dropdown + custom account modal
-        └── ConfirmModal.tsx    # Confirmation dialog modal
+        ├── ConfirmModal.tsx    # Confirmation dialog modal
+        ├── Header.tsx          # Toolbar (lang, dark, OCR, reset toggles)
+        ├── OCRZone.tsx         # Receipt scanner drag-drop zone
+        ├── PeopleSection.tsx   # People list with search, autocomplete, bulk insert
+        ├── ItemCard.tsx        # Single item with drag, price toggle, person assignment
+        ├── ItemsSection.tsx    # Items list container with add button
+        ├── AdditionalCosts.tsx # Shipping, tax, parking, discounts, bank, rounding
+        ├── PersonAccordion.tsx # Expandable person bill breakdown
+        ├── PaymentSummary.tsx  # Summary with export/download/copy buttons
+        ├── StatusNotification.tsx  # OCR scanning overlay
+        ├── WhatsNewModal.tsx   # Version changelog modal
+        ├── BulkInsertModal.tsx # Bulk person:item paste modal
+        └── widgets/
+            ├── CalculatorWidget.tsx    # Floating calculator
+            ├── ClockWidget.tsx         # Analog + digital clock
+            └── PaymentTrackerWidget.tsx# Paid/unpaid tracker
 ```
 
 ## Code Style & Conventions
 
 ### Architecture
-- **Component-based**: Split into logical files (icons, components, types, translations)
-- **Single root component**: `SplitBill` contains all state and logic
-- **localStorage persistence**: All state auto-saves to `localStorage`
+- **Context-driven**: All state managed via `AppContext` with `useApp()` hook
+- **Custom hooks**: Business logic extracted into dedicated hooks (calc, OCR, dark mode, etc.)
+- **Composition layer**: `SplitBill.tsx` is a thin component that assembles sections — no state or logic
+- **localStorage persistence**: Handled by `useLocalStorage` hook + `AppContext` provider
 
 ### Imports & Dependencies
 - All dependencies from npm (no CDN):
@@ -67,21 +98,23 @@ split-bill/
   - `tesseract.js` — OCR engine
   - `dom-to-image` — image export
   - `tailwindcss`, `@tailwindcss/vite` — styling
-- Use ES module imports with `.tsx`/`.ts` extensions omitted
+- Components access state via `useApp()` — avoid prop drilling
+- Import types from `../types`, icons from `../icons`, utils/hooks from barrel exports
 
 ### Naming Conventions
-- **Components**: PascalCase (`SplitBill`, `AccountSelector`, `ConfirmModal`)
-- **Icon components**: PascalCase, named after the icon (`Trash2`, `Plus`, `Users`)
+- **Components**: PascalCase (`SplitBill`, `PersonAccordion`, `CalculatorWidget`)
+- **Hooks**: camelCase with `use` prefix (`useBillCalculator`, `useOCR`)
+- **Utils**: camelCase (`formatMoney`, `parseReceiptText`)
+- **Constants**: UPPER_SNAKE_CASE (`STORAGE_KEY`, `APP_VERSION`)
 - **State variables**: camelCase (`items`, `persons`, `darkMode`, `roundTo100`)
 - **Event handlers**: camelCase, action-prefixed (`handleScanReceipt`, `addItem`)
-- **Helper functions**: camelCase (`formatMoney`, `calculateSplit`, `parseReceiptText`)
-- **Constants**: UPPER_SNAKE_CASE (`STORAGE_KEY`, `LANGUAGE_KEY`, `VERSION_KEY`)
 - **Mixed language**: Indonesian variable names preserved (`ongkir`, `biayaLayanan`, `diskon`, `voucher`)
 
 ### State Management
+- Centralized in `AppContext.tsx` via `useLocalStorage` hook
 - Heavy use of `useState` (30+ state variables)
 - `useEffect` for: localStorage sync, dark mode, language persistence, clipboard paste, clock timer
-- No context, no reducers
+- No reducers, no external state libraries
 - Item shape: `{ id, name, price, persons: { [name]: quantity }, priceType: "unit" | "total" }`
 
 ### Styling
@@ -109,12 +142,13 @@ split-bill/
 
 ### Internationalization (i18n)
 - `translations` object with `en` and `id` keys, typed via `Translations` interface
-- Access via `t = translations[language]`
+- Access via `useLanguage()` hook which returns `t = translations[language]`
 - All UI text must be translatable — add keys to both language objects
 
 ### Key Patterns
-- When adding state, always add to the `dataToSave` object in the localStorage `useEffect`
+- When adding state, include it in `AppContext` provider and `useLocalStorage` persisted data
 - Use existing icon components before adding new SVGs
 - Currency formatting: `toLocaleString("id-ID")`
 - Item IDs: `Date.now() + Math.random() * 1000000`
 - Status messages auto-clear after 2000ms via `setTimeout`
+- Components should use `useApp()` context — never duplicate state
