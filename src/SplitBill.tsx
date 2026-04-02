@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useApp } from "./context";
 import { Header } from "./components/Header";
 import { BillInfoSection } from "./components/BillInfoSection";
@@ -18,6 +19,30 @@ import { ConfirmModal } from "./components/ConfirmModal";
 
 function SplitBill() {
   const { t, showResetModal, setShowResetModal, resetAllData, typewriter } = useApp();
+
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+
+    const syncScrollLock = () => {
+      const hasModal = !!document.querySelector(".fixed.inset-0.z-50");
+      html.style.overflow = hasModal ? "hidden" : previousHtmlOverflow;
+      body.style.overflow = hasModal ? "hidden" : previousBodyOverflow;
+    };
+
+    syncScrollLock();
+
+    const observer = new MutationObserver(syncScrollLock);
+    observer.observe(body, { childList: true, subtree: true, attributes: true, attributeFilter: ["class"] });
+
+    return () => {
+      observer.disconnect();
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-6 px-3 sm:py-8 sm:px-4 font-sans transition-colors">

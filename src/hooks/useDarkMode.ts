@@ -1,18 +1,9 @@
 import { useState, useEffect } from "react";
 
 export function useDarkMode(): [boolean, () => void] {
-  function getDeviceDarkmode() {
-    return window.matchMedia("(prefers-color-scheme: dark)").matches;
-  }
   const [darkMode, setDarkMode] = useState(() => {
     try {
-      if (localStorage.getItem("darkMode") === "true") {
-        return true;
-      }
-      else if (getDeviceDarkmode()) {
-        return true;
-      }
-      return false
+      return localStorage.getItem("darkMode") === "true";
     } catch {
       return false;
     }

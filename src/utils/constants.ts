@@ -53,6 +53,7 @@ export const changelog = {
     new: [
       "Migrate to React project",
       "Added Place / Resto Name field to label what the split bill is for",
+      "Added typewriter text effect for key UI messaging",
     ],
     improved: [],
     removed: [],
@@ -61,6 +62,7 @@ export const changelog = {
     new: [
       "Migrasi ke project React",
       "Menambahkan kolom Nama Tempat / Resto untuk menandai tagihan ini untuk apa",
+      "Menambahkan efek teks typewriter untuk pesan UI utama",
     ],
     improved: [],
     removed: [],

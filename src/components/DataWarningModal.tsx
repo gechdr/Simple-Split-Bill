@@ -26,7 +26,7 @@ export const DataWarningModal: React.FC<DataWarningModalProps> = ({
   if (stage === 1) {
     // First warning: Offer to backup current data
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 px-4 animate-fade-in">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4 animate-fade-in">
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full shadow-2xl animate-slide-down border-2 border-amber-500">
           <div className="flex items-center gap-3 mb-3">
             <span className="text-3xl">⚠️</span>
@@ -64,7 +64,7 @@ export const DataWarningModal: React.FC<DataWarningModalProps> = ({
   } else {
     // Second warning: Final confirmation
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 px-4 animate-fade-in">
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4 animate-fade-in">
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-sm w-full shadow-2xl animate-slide-down border-2 border-red-500">
           <div className="flex items-center gap-3 mb-3">
             <span className="text-3xl">🚨</span>
