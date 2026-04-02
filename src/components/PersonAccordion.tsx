@@ -46,7 +46,7 @@ export const PersonAccordion: React.FC<PersonAccordionProps> = ({ person }) => {
         onClick={() => toggleAccordion(person)}
       >
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <span className="font-medium text-gray-700 dark:text-gray-200 truncate">{person}</span>
+          <span className="font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">{person}</span>
           <button
             className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition shrink-0"
             onClick={(e) => {
