@@ -91,7 +91,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index }) => {
               if (totalQty === 0 || price === 0) return "";
               return item.priceType === "unit"
                 ? `(${totalQty}x Rp ${formatMoney(price)} = Rp ${formatMoney(price * totalQty)})`
-                : `(Rp ${formatMoney(price)} ÷ ${totalQty} = Rp ${formatMoney(price / totalQty)})`;
+                : `(Rp ${formatMoney(price)} Ã· ${totalQty} = Rp ${formatMoney(price / totalQty)})`;
             })()}
           </span>
         )}
@@ -132,7 +132,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index }) => {
                   const quantity = item.persons[person] || 0;
                   const isSelected = quantity > 0;
                   return (
-                    <li key={person} className="flex items-center justify-between py-2.5 gap-3">
+                    <li key={person} className="flex items-center py-2.5 gap-3">
                       <button
                         onClick={() => togglePerson(item.id, person)}
                         className="flex items-center gap-3 flex-1 text-left min-w-0"
@@ -145,46 +145,47 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index }) => {
                             </svg>
                           )}
                         </span>
-                        <span className={`text-sm font-medium truncate ${isSelected ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
+                        <span className={`inline-flex items-center h-4 text-sm font-medium truncate translate-y-px ${isSelected ? "text-gray-900 dark:text-gray-100" : "text-gray-500 dark:text-gray-400"}`}>
                           {person}
                         </span>
                       </button>
-                      {isSelected && (
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (quantity > 1) setPersonQuantity(item.id, person, quantity - 1);
-                            }}
-                            className="w-7 h-7 flex items-center justify-center rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition font-bold text-base"
-                            title="Decrease quantity"
-                          >
-                            −
-                          </button>
-                          <input
-                            type="number"
-                            min="1"
-                            value={quantity}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              const n = parseInt(e.target.value);
-                              if (!isNaN(n) && n >= 1) setPersonQuantity(item.id, person, n);
-                            }}
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-10 py-0.5 text-center bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-500 rounded text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          />
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setPersonQuantity(item.id, person, quantity + 1);
-                            }}
-                            className="w-7 h-7 flex items-center justify-center rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition font-bold text-base"
-                            title="Increase quantity"
-                          >
-                            +
-                          </button>
-                        </div>
-                      )}
+                      <div className={`flex items-center justify-end gap-1 shrink-0 w-[100px] ${isSelected ? "visible" : "invisible"}`}>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (quantity > 1) setPersonQuantity(item.id, person, quantity - 1);
+                          }}
+                          disabled={!isSelected}
+                          className="w-7 h-7 flex items-center justify-center rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition font-bold text-base disabled:cursor-default"
+                          title="Decrease quantity"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          min="1"
+                          value={quantity}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            const n = parseInt(e.target.value);
+                            if (!isNaN(n) && n >= 1) setPersonQuantity(item.id, person, n);
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          disabled={!isSelected}
+                          className="w-10 py-0.5 text-center bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-500 rounded text-sm font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:cursor-default"
+                        />
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPersonQuantity(item.id, person, quantity + 1);
+                          }}
+                          disabled={!isSelected}
+                          className="w-7 h-7 flex items-center justify-center rounded border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition font-bold text-base disabled:cursor-default"
+                          title="Increase quantity"
+                        >
+                          +
+                        </button>
+                      </div>
                     </li>
                   );
                 })}
