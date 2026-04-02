@@ -143,6 +143,19 @@ export interface Translations {
   paymentPaid: string;
   paymentAllSettled: string;
   paymentNoPeople: string;
+  shareTitle: string;
+  shareDescription: string;
+  shareNoData: string;
+  shareCopyButton: string;
+  tooltipShare: string;
+  dataWarningTitle: string;
+  dataWarningMessage: string;
+  dataWarningCopyButton: string;
+  dataWarningProceed: string;
+  dataWarningFinalTitle: string;
+  dataWarningFinalMessage: string;
+  dataWarningFinalConfirm: string;
+  dataWarningFinalCancel: string;
 }
 
 export interface TranslationSet {
@@ -302,6 +315,19 @@ export const translations: TranslationSet = {
     paymentPaid: "Paid",
     paymentAllSettled: "All settled up!",
     paymentNoPeople: "No people added yet.",
+    shareTitle: "Share your split bill",
+    shareDescription: "Share this URL to let others view your split bill:",
+    shareNoData: "Add some items to generate a share link",
+    shareCopyButton: "Copy Link",
+    tooltipShare: "Share your split bill via URL",
+    dataWarningTitle: "Shared Data Detected",
+    dataWarningMessage: "Loading this shared split bill will overwrite your current data. Copy your current data link to backup before proceeding.",
+    dataWarningCopyButton: "Copy My Data Link",
+    dataWarningProceed: "Proceed Without Backup",
+    dataWarningFinalTitle: "Are You Sure?",
+    dataWarningFinalMessage: "Your previous split bill data will be permanently removed! This action cannot be undone.",
+    dataWarningFinalConfirm: "Yes, Replace My Data",
+    dataWarningFinalCancel: "Cancel",
   },
   id: {
     title: "Patungan",
@@ -459,5 +485,18 @@ export const translations: TranslationSet = {
     paymentPaid: "Sudah Bayar",
     paymentAllSettled: "Semua sudah lunas!",
     paymentNoPeople: "Belum ada orang yang ditambahkan.",
+    shareTitle: "Bagikan patungan Anda",
+    shareDescription: "Bagikan URL ini agar orang lain bisa melihat patungan Anda:",
+    shareNoData: "Tambahkan barang untuk menghasilkan link berbagi",
+    shareCopyButton: "Salin Link",
+    tooltipShare: "Bagikan patungan Anda melalui URL",
+    dataWarningTitle: "Data Bersama Terdeteksi",
+    dataWarningMessage: "Memuat patungan bersama ini akan menimpa data Anda saat ini. Salin link data Anda untuk cadangan sebelum melanjutkan.",
+    dataWarningCopyButton: "Salin Link Data Saya",
+    dataWarningProceed: "Lanjutkan Tanpa Cadangan",
+    dataWarningFinalTitle: "Anda Yakin?",
+    dataWarningFinalMessage: "Data patungan Anda sebelumnya akan dihapus secara permanen! Tindakan ini tidak dapat dibatalkan.",
+    dataWarningFinalConfirm: "Ya, Ganti Data Saya",
+    dataWarningFinalCancel: "Batal",
   },
 };

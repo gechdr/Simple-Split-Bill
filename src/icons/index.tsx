@@ -136,3 +136,36 @@ export const ListChecks: React.FC<IconProps> = ({ className }) => (
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
   </svg>
 );
+
+export const Share2: React.FC<IconProps> = ({ className }) => (
+  <svg className={className || "w-6 h-6"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <circle cx="18" cy="5" r="3" strokeWidth="2" />
+    <circle cx="6" cy="12" r="3" strokeWidth="2" />
+    <circle cx="18" cy="19" r="3" strokeWidth="2" />
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" strokeWidth="2" />
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" strokeWidth="2" />
+  </svg>
+);
+
+export const TypewriterCw: React.FC<IconProps> = ({ className }) => (
+  <svg className={className || "w-6 h-6"} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    {/* Top roller */}
+    <rect x="5" y="4" width="14" height="3" rx="1" strokeWidth="2" />
+    {/* Paper */}
+    <path
+      d="M7 7v3c0 1 1 2 2 2h6c1 0 2-1 2-2V7"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    {/* Body */}
+    <rect x="4" y="12" width="16" height="6" rx="2" strokeWidth="2" />
+    {/* Keys */}
+    <circle cx="7" cy="15" r="0.8" fill="currentColor" />
+    <circle cx="10" cy="15" r="0.8" fill="currentColor" />
+    <circle cx="13" cy="15" r="0.8" fill="currentColor" />
+    <circle cx="16" cy="15" r="0.8" fill="currentColor" />
+    {/* Base */}
+    <path d="M3 18h18" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);

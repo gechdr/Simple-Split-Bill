@@ -31,6 +31,23 @@ function ctx() {
     showResetModal: true,
     setShowResetModal: vi.fn(),
     resetAllData: vi.fn(),
+    typewriter: {
+      showShareModal: false,
+      setShowShareModal: vi.fn(),
+      showWarningModal: false,
+      setShowWarningModal: vi.fn(),
+      warningStage: 1,
+      setWarningStage: vi.fn(),
+      copyStatus: "",
+      setCopyStatus: vi.fn(),
+      getShareUrl: vi.fn(() => null),
+      hasSharedDataInUrl: vi.fn(() => false),
+      copyShareLink: vi.fn(),
+      copyMyDataAndProceed: vi.fn(),
+      proceedWithoutBackup: vi.fn(),
+      confirmDataOverwrite: vi.fn(),
+      cancelWarning: vi.fn(),
+    },
   };
 }
 

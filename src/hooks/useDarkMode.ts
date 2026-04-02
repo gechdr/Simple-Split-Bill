@@ -1,14 +1,22 @@
 import { useState, useEffect } from "react";
 
 export function useDarkMode(): [boolean, () => void] {
+  function getDeviceDarkmode() {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
   const [darkMode, setDarkMode] = useState(() => {
     try {
-      return localStorage.getItem("darkMode") === "true";
+      if (localStorage.getItem("darkMode") === "true") {
+        return true;
+      }
+      else if (getDeviceDarkmode()) {
+        return true;
+      }
+      return false
     } catch {
       return false;
     }
   });
-
   useEffect(() => {
     if (darkMode) document.documentElement.classList.add("dark");
     else document.documentElement.classList.remove("dark");

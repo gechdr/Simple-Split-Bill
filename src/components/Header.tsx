@@ -1,6 +1,6 @@
 import React from "react";
 import { useApp } from "../context";
-import { Globe, Sun, Moon, Calculator, ListChecks, Eye, EyeOff, RefreshCw } from "../icons";
+import { Globe, Sun, Moon, Calculator, ListChecks, Eye, EyeOff, RefreshCw, TypewriterCw } from "../icons";
 
 export const Header: React.FC = () => {
   const {
@@ -16,6 +16,7 @@ export const Header: React.FC = () => {
     showOCR,
     setShowOCR,
     setShowResetModal,
+    typewriter,
     appVersion,
   } = useApp();
 
@@ -57,11 +58,18 @@ export const Header: React.FC = () => {
               onClick={() => setShowOCR(!showOCR)}
               className="flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
               title={t.tooltipOCR}
-            >
-              {showOCR ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-            </button>
-            <button
-              onClick={() => setShowResetModal(true)}
+                        >
+                          {showOCR ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                        </button>
+                        <button
+                          onClick={() => typewriter.setShowShareModal(true)}
+                          className="flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                          title={t.tooltipShare}
+                        >
+                          <TypewriterCw className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => setShowResetModal(true)}
               className="flex items-center gap-1.5 px-3 py-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition border border-gray-200 dark:border-gray-700 hover:border-red-200 dark:hover:border-red-800"
               title={t.tooltipReset}
             >

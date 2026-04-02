@@ -9,13 +9,15 @@ import { PaymentSummary } from "./components/PaymentSummary";
 import { StatusNotification } from "./components/StatusNotification";
 import { WhatsNewModal } from "./components/WhatsNewModal";
 import { BulkInsertModal } from "./components/BulkInsertModal";
+import { TypewriterModal } from "./components/TypewriterModal";
+import { DataWarningModal } from "./components/DataWarningModal";
 import { CalculatorWidget } from "./components/widgets/CalculatorWidget";
 import { ClockWidget } from "./components/widgets/ClockWidget";
 import { PaymentTrackerWidget } from "./components/widgets/PaymentTrackerWidget";
 import { ConfirmModal } from "./components/ConfirmModal";
 
 function SplitBill() {
-  const { t, showResetModal, setShowResetModal, resetAllData } = useApp();
+  const { t, showResetModal, setShowResetModal, resetAllData, typewriter } = useApp();
 
   return (
     <div className="min-h-screen bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-6 px-3 sm:py-8 sm:px-4 font-sans transition-colors">
@@ -31,6 +33,25 @@ function SplitBill() {
           <StatusNotification />
           <WhatsNewModal />
           <BulkInsertModal />
+          <TypewriterModal
+            isOpen={typewriter.showShareModal}
+            shareUrl={typewriter.getShareUrl()}
+            onCopy={() => {
+              typewriter.copyShareLink();
+              typewriter.setShowShareModal(false);
+            }}
+            onCancel={() => typewriter.setShowShareModal(false)}
+            t={t}
+          />
+          <DataWarningModal
+            isOpen={typewriter.showWarningModal}
+            stage={typewriter.warningStage}
+            onCopyAndProceed={typewriter.copyMyDataAndProceed}
+            onProceedWithoutBackup={typewriter.proceedWithoutBackup}
+            onFinalConfirm={typewriter.confirmDataOverwrite}
+            onCancel={typewriter.cancelWarning}
+            t={t}
+          />
           <ConfirmModal
             isOpen={showResetModal}
             onConfirm={resetAllData}

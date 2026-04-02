@@ -6,8 +6,9 @@ import { useOCR } from "../hooks/useOCR";
 import { useClipboard } from "../hooks/useClipboard";
 import { useCalculator } from "../hooks/useCalculator";
 import { useDragWidget } from "../hooks/useDragWidget";
+import { useTypewriter } from "../hooks/useTypewriter";
 import { formatMoneySplit } from "../utils/formatters";
-import { VERSION_KEY, APP_VERSION, DEFAULT_ITEM } from "../utils/constants";
+import { VERSION_KEY, APP_VERSION, DEFAULT_ITEM, SHOW_CALCULATOR_KEY, SHOW_PAYMENT_TRACKER_KEY } from "../utils/constants";
 import type { Language } from "../types";
 import type { Translations } from "../translations";
 
@@ -21,6 +22,7 @@ interface UIContextValue {
   ocr: ReturnType<typeof useOCR>;
   clipboard: ReturnType<typeof useClipboard>;
   dragWidget: ReturnType<typeof useDragWidget>;
+  typewriter: ReturnType<typeof useTypewriter>;
   newPersonName: string;
   setNewPersonName: React.Dispatch<React.SetStateAction<string>>;
   duplicatePersonError: boolean;
@@ -97,8 +99,22 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
   const [personSearch, setPersonSearch] = useState("");
   const [showPersonSuggestions, setShowPersonSuggestions] = useState(false);
   const [itemPersonSearch, setItemPersonSearch] = useState<Record<number, string>>({});
-  const [showCalculator, setShowCalculator] = useState(true);
-  const [showPaymentTracker, setShowPaymentTracker] = useState(true);
+  const [showCalculator, setShowCalculator] = useState(() => {
+    try {
+      const saved = localStorage.getItem(SHOW_CALCULATOR_KEY);
+      return saved === "true";
+    } catch {
+      return false;
+    }
+  });
+  const [showPaymentTracker, setShowPaymentTracker] = useState(() => {
+    try {
+      const saved = localStorage.getItem(SHOW_PAYMENT_TRACKER_KEY);
+      return saved === "true";
+    } catch {
+      return false;
+    }
+  });
   const [showOCR, setShowOCR] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [showWhatsNew, setShowWhatsNew] = useState(false);
@@ -118,6 +134,7 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
 
   const ocr = useOCR({ t, setItems, setTax, setBiayaLayanan, setOngkir, setDiskon, setVoucher });
   const clipboard = useClipboard({ summaryRef, paymentTrackerRef, darkMode, t });
+  const typewriter = useTypewriter({ t });
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -128,6 +145,22 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
     const seenVersion = localStorage.getItem(VERSION_KEY);
     if (seenVersion !== APP_VERSION) setShowWhatsNew(true);
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SHOW_CALCULATOR_KEY, showCalculator.toString());
+    } catch (error) {
+      console.error("Error saving calculator preference:", error);
+    }
+  }, [showCalculator]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SHOW_PAYMENT_TRACKER_KEY, showPaymentTracker.toString());
+    } catch (error) {
+      console.error("Error saving payment tracker preference:", error);
+    }
+  }, [showPaymentTracker]);
 
   const dismissWhatsNew = () => {
     localStorage.setItem(VERSION_KEY, APP_VERSION);
@@ -255,7 +288,7 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
   const value: UIContextValue = {
     darkMode, toggleDarkMode,
     language, toggleLanguage, t,
-    calculator, ocr, clipboard, dragWidget,
+    calculator, ocr, clipboard, dragWidget, typewriter,
     newPersonName, setNewPersonName,
     duplicatePersonError, setDuplicatePersonError,
     personSearch, setPersonSearch,

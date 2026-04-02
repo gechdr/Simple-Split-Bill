@@ -6,3 +6,4 @@ export * from "./useCalculator";
 export * from "./useClipboard";
 export * from "./useDragWidget";
 export * from "./useOCR";
+export * from "./useTypewriter";

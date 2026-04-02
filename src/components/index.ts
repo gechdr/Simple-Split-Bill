@@ -10,3 +10,5 @@ export { PaymentSummary } from "./PaymentSummary";
 export { StatusNotification } from "./StatusNotification";
 export { WhatsNewModal } from "./WhatsNewModal";
 export { BulkInsertModal } from "./BulkInsertModal";
+export { TypewriterModal } from "./TypewriterModal";
+export { DataWarningModal } from "./DataWarningModal";

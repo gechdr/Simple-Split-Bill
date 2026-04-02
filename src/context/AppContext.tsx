@@ -8,6 +8,7 @@ import type { useCalculator } from "../hooks/useCalculator";
 import type { useOCR } from "../hooks/useOCR";
 import type { useClipboard } from "../hooks/useClipboard";
 import type { useDragWidget } from "../hooks/useDragWidget";
+import type { useTypewriter } from "../hooks/useTypewriter";
 
 // Combined interface for backward-compatible useApp() consumers
 interface AppContextValue {
@@ -69,6 +70,7 @@ interface AppContextValue {
   ocr: ReturnType<typeof useOCR>;
   clipboard: ReturnType<typeof useClipboard>;
   dragWidget: ReturnType<typeof useDragWidget>;
+  typewriter: ReturnType<typeof useTypewriter>;
   newPersonName: string;
   setNewPersonName: React.Dispatch<React.SetStateAction<string>>;
   duplicatePersonError: boolean;
