@@ -26,7 +26,7 @@ export const PaymentSummary: React.FC = () => {
 
   return (
     <>
-      <div className="mb-6 overflow-hidden rounded-xl border-2 border-gray-300 dark:border-gray-700 shadow-md">
+      <div className="mb-6 overflow-hidden rounded-xl border-2 border-gray-300 dark:border-gray-700 shadow-md smooth-surface">
         <div ref={summaryRef} className="bg-white dark:bg-gray-800 p-5 sm:p-8">
           <div className="flex items-center gap-3 mb-5">
             <div className="bg-gray-900 dark:bg-gray-700 rounded-full p-1.5">
@@ -102,7 +102,7 @@ export const PaymentSummary: React.FC = () => {
         <button
           onClick={() => clipboard.handleCapture("download")}
           disabled={!!clipboard.downloadStatus}
-          className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-sm smooth-interactive"
           title={t.tooltipDownload}
         >
           <Download className="w-5 h-5 shrink-0" />
@@ -111,7 +111,7 @@ export const PaymentSummary: React.FC = () => {
         <button
           onClick={() => clipboard.handleCapture("copy")}
           disabled={!!clipboard.captureStatus}
-          className="flex-1 bg-gray-900 dark:bg-gray-700 text-white py-3 rounded-lg hover:bg-black dark:hover:bg-gray-600 transition flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-gray-200 dark:shadow-gray-900"
+          className="flex-1 bg-gray-900 dark:bg-gray-700 text-white py-3 rounded-lg hover:bg-black dark:hover:bg-gray-600 transition flex items-center justify-center gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-gray-200 dark:shadow-gray-900 smooth-interactive"
           title={t.tooltipCopy}
         >
           <Copy className="w-5 h-5 shrink-0" />

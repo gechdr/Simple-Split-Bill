@@ -25,7 +25,7 @@ export const PeopleSection: React.FC = () => {
   );
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 mb-6 border-2 border-gray-300 dark:border-gray-700 shadow-md">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 mb-6 border-2 border-gray-300 dark:border-gray-700 shadow-md smooth-surface">
       <div className="flex items-center justify-between mb-4 border-b border-gray-100 dark:border-gray-700 pb-2">
         <div className="flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-gray-700 dark:text-gray-300 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -35,7 +35,7 @@ export const PeopleSection: React.FC = () => {
         </div>
         <button
           onClick={() => { setBulkInsertText(""); setShowBulkInsert(true); }}
-          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+          className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition smooth-interactive"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" />
@@ -78,7 +78,7 @@ export const PeopleSection: React.FC = () => {
         </div>
         <button
           onClick={addPerson}
-          className="bg-gray-900 dark:bg-gray-700 text-white px-6 py-2.5 rounded-lg hover:bg-black dark:hover:bg-gray-600 transition shadow-sm font-medium"
+          className="bg-gray-900 dark:bg-gray-700 text-white px-6 py-2.5 rounded-lg hover:bg-black dark:hover:bg-gray-600 transition shadow-sm font-medium smooth-interactive"
           title={t.tooltipAddPerson}
         >
           {t.add}

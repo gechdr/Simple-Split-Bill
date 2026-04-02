@@ -5,7 +5,7 @@ export const BillInfoSection: React.FC = () => {
   const { t, placeName, setPlaceName } = useApp();
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 mb-6 border-2 border-gray-300 dark:border-gray-700 shadow-md">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 mb-6 border-2 border-gray-300 dark:border-gray-700 shadow-md smooth-surface">
       <label className="block text-xs font-medium text-gray-500 dark:text-gray-300 uppercase mb-2">
         {t.placeRestoName}
       </label>

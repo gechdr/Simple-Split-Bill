@@ -35,16 +35,31 @@ export function useDragWidget() {
     };
     const handleMouseUp = () => setState((prev) => ({ ...prev, draggingWidgetId: null }));
     if (state.draggingWidgetId) {
+      const previousBodyUserSelect = document.body.style.userSelect;
+      const previousBodyWebkitUserSelect = document.body.style.getPropertyValue("-webkit-user-select");
+      const previousHtmlCursor = document.documentElement.style.cursor;
+      document.body.style.userSelect = "none";
+      document.body.style.setProperty("-webkit-user-select", "none");
+      document.documentElement.style.cursor = "grabbing";
+
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
       return () => {
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
+        document.body.style.userSelect = previousBodyUserSelect;
+        if (previousBodyWebkitUserSelect) {
+          document.body.style.setProperty("-webkit-user-select", previousBodyWebkitUserSelect);
+        } else {
+          document.body.style.removeProperty("-webkit-user-select");
+        }
+        document.documentElement.style.cursor = previousHtmlCursor;
       };
     }
   }, [state.draggingWidgetId]);
 
   const handleDragStart = useCallback((widget: string, e: React.MouseEvent) => {
+    e.preventDefault?.();
     setState((prev) => ({
       ...prev,
       draggingWidgetId: widget,

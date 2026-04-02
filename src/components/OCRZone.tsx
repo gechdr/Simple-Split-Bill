@@ -22,7 +22,7 @@ export const OCRZone: React.FC = () => {
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={triggerFileInput}
-        className={`relative border-2 border-dashed rounded-xl p-8 sm:p-12 text-center cursor-pointer transition-all ${isDragging ? "border-gray-900 dark:border-gray-300 bg-gray-50 dark:bg-gray-700 scale-[1.02]" : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"} ${isScanning ? "pointer-events-none opacity-50" : ""}`}
+        className={`relative border-2 border-dashed rounded-xl p-8 sm:p-12 text-center cursor-pointer transition-all smooth-surface ${isDragging ? "border-gray-900 dark:border-gray-300 bg-gray-50 dark:bg-gray-700 scale-[1.02]" : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700"} ${isScanning ? "pointer-events-none opacity-50" : ""}`}
       >
         <div className="flex flex-col items-center gap-3">
           <div className={`rounded-full p-4 transition-colors ${isDragging ? "bg-gray-900 dark:bg-gray-300" : "bg-gray-100 dark:bg-gray-700"}`}>
@@ -38,7 +38,7 @@ export const OCRZone: React.FC = () => {
           {!isScanning && (
             <button
               type="button"
-              className="mt-2 inline-flex items-center gap-2 bg-gray-900 dark:bg-gray-700 text-white px-6 py-2.5 rounded-lg hover:bg-black dark:hover:bg-gray-600 transition shadow-sm font-medium"
+              className="mt-2 inline-flex items-center gap-2 bg-gray-900 dark:bg-gray-700 text-white px-6 py-2.5 rounded-lg hover:bg-black dark:hover:bg-gray-600 transition shadow-sm font-medium smooth-interactive"
               onClick={(e) => {
                 e.stopPropagation();
                 triggerFileInput();
