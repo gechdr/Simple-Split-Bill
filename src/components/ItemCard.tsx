@@ -26,6 +26,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index }) => {
     draggedItem,
     dragOverIndex,
   } = useApp();
+  const selectedPeopleCount = Object.values(item.persons).filter((qty) => Number(qty) > 0).length;
 
   return (
     <div
@@ -64,7 +65,7 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index }) => {
         </button>
       </div>
       <div className="mb-3 flex flex-col sm:flex-row sm:items-center gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-gray-500 dark:text-gray-300 font-medium">{t.priceTypeLabel}:</span>
           <div className="flex gap-2">
             <button
@@ -95,6 +96,16 @@ export const ItemCard: React.FC<ItemCardProps> = ({ item, index }) => {
             })()}
           </span>
         )}
+        <span
+          data-testid="item-people-count"
+          className="inline-flex items-center gap-1 rounded-full bg-gray-100 dark:bg-gray-800 px-2 py-1 text-xs font-semibold text-gray-600 dark:text-gray-300 sm:ml-auto"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="8" r="4" />
+            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+          </svg>
+          {selectedPeopleCount}
+        </span>
       </div>
       <div className="mt-3">
         {persons.length === 0 ? (

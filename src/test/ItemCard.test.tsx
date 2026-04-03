@@ -107,4 +107,28 @@ describe("ItemCard", () => {
     await userEvent.click(screen.getByTitle("Decrease quantity"));
     expect(ctx.setPersonQuantity).toHaveBeenCalledWith(101, "Alice", 1);
   });
+
+  it("shows assigned people count and keeps it right-aligned", () => {
+    const ctx = createContext();
+    useAppMock.mockReturnValue(ctx);
+
+    render(<ItemCard item={item} index={0} />);
+
+    const counter = screen.getByTestId("item-people-count");
+    expect(counter).toHaveTextContent("1");
+    expect(counter).toHaveClass("sm:ml-auto");
+  });
+
+  it("shows zero when no people are assigned to the item", () => {
+    const ctx = createContext();
+    useAppMock.mockReturnValue(ctx);
+
+    const unassignedItem: BillItem = {
+      ...item,
+      persons: { Alice: 0 },
+    };
+
+    render(<ItemCard item={unassignedItem} index={0} />);
+    expect(screen.getByTestId("item-people-count")).toHaveTextContent("0");
+  });
 });
