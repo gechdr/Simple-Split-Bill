@@ -73,10 +73,13 @@ pipeline {
     stage('Sync Build To S3') {
         steps {
             script{
-                sh """
-                    . /home/marmar/.bash_profile
-                    npx wrangler pages deploy ./dist --project-name=smangka
-                """
+                withCredentials([string(credentialsId: 'CLOUDFLARE_MARMAR', variable: 'CF_API_TOKEN')]) {
+                  sh """
+                      export CLOUDFLARE_API_TOKEN=$CF_API_TOKEN
+                      . /home/marmar/.bash_profile
+                      npx wrangler pages deploy ./dist --project-name=smangka
+                  """
+                }
             }
         }
     }
