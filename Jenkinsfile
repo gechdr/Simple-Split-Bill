@@ -9,8 +9,9 @@ import groovy.json.JsonOutput
 def jobName = env.JOB_NAME
 def dateStr = new Date().format("yyyyMMdd", TimeZone.getTimeZone("Asia/Jakarta"))
 def buildNum = env.BUILD_NUMBER
-def branchName = env.GIT_BRANCH?.trim() ?: "unknown-branch"
-
+def branchName = env.BRANCH_NAME ?: env.GIT_BRANCH?.replaceFirst(/^origin\\//, '') ?: "unknown"
+def deployOutput = ""
+def url = ""
 /* ================================
    📤 Discord Notification Function
    ================================ */
@@ -72,14 +73,21 @@ pipeline {
 
     stage('Sync Build To S3') {
         steps {
-            script{
-                withCredentials([string(credentialsId: 'CLOUDFLARE_MARMAR', variable: 'CF_API_TOKEN')]) {
-                  sh """
-                      export CLOUDFLARE_API_TOKEN=$CF_API_TOKEN
-                      . /home/marmar/.bash_profile
-                      npx wrangler pages deploy ./dist --project-name=smangka
-                  """
-                }
+            try {
+                sh """
+                    export CLOUDFLARE_API_TOKEN=$CF_API_TOKEN
+                    . /home/marmar/.bash_profile
+                """
+                deployOutput = sh(
+                    script: """
+                        npx wrangler pages deploy ./dist --project-name=smangka
+                    """,
+                    returnStdout: true
+                ).trim()
+                url = deployOutput.find(/https?:\/\/[^\s]+/)
+            } catch (err) {
+                deployOutput = err.getMessage()
+                throw err
             }
         }
     }
@@ -92,7 +100,12 @@ pipeline {
           content: "Build Completed",
           embeds: [[
             title: "Build #${buildNum} Succeeded",
-            description: "Job: ${jobName}\n",
+            description: "Job: ${jobName}\nU can access the build at: ${url}",
+            color: 1127128
+          ],
+          [
+            title: "Build Output",
+            description: "```${deployOutput}```",
             color: 1127128
           ]]
         ])
