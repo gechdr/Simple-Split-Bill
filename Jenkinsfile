@@ -74,9 +74,6 @@ pipeline {
     stage('Sync Build To S3') {
         steps {
             script {
-                def deployOutput = ""
-                def url = ""
-
                 withCredentials([string(credentialsId: 'CLOUDFLARE_MARMAR', variable: 'CLOUDFLARE_API_TOKEN')]) {
                     try {
                         deployOutput = sh(
