@@ -73,21 +73,23 @@ pipeline {
 
     stage('Sync Build To S3') {
         steps {
-            try {
-                sh """
-                    export CLOUDFLARE_API_TOKEN=$CF_API_TOKEN
-                    . /home/marmar/.bash_profile
-                """
-                deployOutput = sh(
-                    script: """
-                        npx wrangler pages deploy ./dist --project-name=smangka
-                    """,
-                    returnStdout: true
-                ).trim()
-                url = deployOutput.find(/https?:\/\/[^\s]+/)
-            } catch (err) {
-                deployOutput = err.getMessage()
-                throw err
+            script{
+                try {
+                    sh """
+                        export CLOUDFLARE_API_TOKEN=$CF_API_TOKEN
+                        . /home/marmar/.bash_profile
+                    """
+                    deployOutput = sh(
+                        script: """
+                            npx wrangler pages deploy ./dist --project-name=smangka
+                        """,
+                        returnStdout: true
+                    ).trim()
+                    url = deployOutput.find(/https?:\/\/[^\s]+/)
+                } catch (err) {
+                    deployOutput = err.getMessage()
+                    throw err
+                }
             }
         }
     }
