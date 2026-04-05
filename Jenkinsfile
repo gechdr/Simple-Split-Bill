@@ -73,23 +73,29 @@ pipeline {
 
     stage('Sync Build To S3') {
         steps {
-            script{
-                try {
-                    sh """
-                        export CLOUDFLARE_API_TOKEN=$CF_API_TOKEN
-                        . /home/marmar/.bash_profile
-                    """
-                    deployOutput = sh(
-                        script: """
-                            npx wrangler pages deploy ./dist --project-name=smangka
-                        """,
-                        returnStdout: true
-                    ).trim()
-                    url = deployOutput.find(/https?:\/\/[^\s]+/)
-                } catch (err) {
-                    deployOutput = err.getMessage()
-                    throw err
+            script {
+                def deployOutput = ""
+                def url = ""
+
+                withCredentials([string(credentialsId: 'CLOUDFLARE_MARMAR', variable: 'CLOUDFLARE_API_TOKEN')]) {
+                    try {
+                        deployOutput = sh(
+                            script: """
+                                . /home/marmar/.bash_profile
+                                npx wrangler pages deploy ./dist --project-name=smangka
+                            """,
+                            returnStdout: true
+                        ).trim()
+
+                        url = deployOutput.find(/https?:\/\/[^\s]+/)
+
+                    } catch (err) {
+                        deployOutput = err.getMessage()
+                        throw err
+                    }
                 }
+
+                echo "Deploy URL: ${url}"
             }
         }
     }
