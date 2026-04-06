@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-2.8.0-blue.svg)
+![Version](https://img.shields.io/badge/version-2.8.2-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![React](https://img.shields.io/badge/React-19-61DAFB.svg?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?logo=typescript)
@@ -305,7 +305,19 @@ Contributions are welcome! Here's how you can help:
 
 ## 📝 Changelog
 
-### v2.8.0 (Current)
+### v2.8.2 (Current)
+- Extracted Custom Account Modal into a separate component to fix dialog opening bugs
+
+### v2.8.1
+- Added Typewriter data sharing to transfer exact bill data between browsers and devices
+- Added Place / Resto Name field to label what the split bill is for
+- Added assigned people count display to ItemCard
+- Implemented scroll lock and typewriter effect for modals
+- Enhanced UI components with smooth transitions for improved interactivity
+- Improved accessibility and layout consistency across components
+- Fixed whitespace handling in PaymentSummary, PersonAccordion, and PaymentTrackerWidget
+
+### v2.8.0
 - Migrated to Vite + React 19 + TypeScript
 - Replaced CDN dependencies with npm packages
 - Component-based architecture (icons, components, types, translations)

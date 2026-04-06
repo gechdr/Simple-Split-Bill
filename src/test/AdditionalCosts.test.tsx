@@ -15,10 +15,10 @@ vi.mock("../components/FormattedInput", () => ({
 }));
 
 vi.mock("../components/AccountSelector", () => ({
-  AccountSelector: ({ onChange, onSaveCustomAccount, onDeleteAccount }: any) => (
+  AccountSelector: ({ onChange, onOpenCustomModal, onDeleteAccount }: any) => (
     <div>
       <button onClick={() => onChange("123")}>select-account</button>
-      <button onClick={onSaveCustomAccount}>save-account</button>
+      <button onClick={onOpenCustomModal}>open-custom-modal</button>
       <button onClick={() => onDeleteAccount("123")}>delete-account</button>
     </div>
   ),
@@ -62,7 +62,7 @@ function ctx(overrides: Record<string, unknown> = {}) {
     customAccountNumber: "", setCustomAccountNumber: vi.fn(),
     customAccountVendor: "", setCustomAccountVendor: vi.fn(),
     roundTo100: false, setRoundTo100: vi.fn(),
-    saveCustomAccount: vi.fn(),
+    setShowCustomAccountModal: vi.fn(),
     deleteBankAccount: vi.fn(),
     ...overrides,
   };
@@ -92,11 +92,11 @@ describe("AdditionalCosts", () => {
     render(<AdditionalCosts />);
 
     fireEvent.click(screen.getByRole("button", { name: "select-account" }));
-    fireEvent.click(screen.getByRole("button", { name: "save-account" }));
+    fireEvent.click(screen.getByRole("button", { name: "open-custom-modal" }));
     fireEvent.click(screen.getByRole("button", { name: "delete-account" }));
 
     expect(c.setSelectedAccount).toHaveBeenCalledWith("123");
-    expect(c.saveCustomAccount).toHaveBeenCalledTimes(1);
+    expect(c.setShowCustomAccountModal).toHaveBeenCalledWith(true);
     expect(c.deleteBankAccount).toHaveBeenCalledWith("123");
   });
 });

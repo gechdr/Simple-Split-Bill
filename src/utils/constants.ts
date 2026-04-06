@@ -5,7 +5,7 @@ export const LANGUAGE_KEY = "splitBillLanguage";
 export const VERSION_KEY = "splitBillSeenVersion";
 export const SHOW_CALCULATOR_KEY = "splitBillShowCalculator";
 export const SHOW_PAYMENT_TRACKER_KEY = "splitBillShowPaymentTracker";
-export const APP_VERSION = "v2.8.1";
+export const APP_VERSION = "v2.8.2";
 
 // All storage keys used by the app
 export const STORAGE_KEYS = [
@@ -50,21 +50,17 @@ export const DEFAULT_BANK_ACCOUNT: BankAccount = {
 
 export const changelog = {
   en: {
-    new: [
-      "Migrate to React project",
-      "Added Place / Resto Name field to label what the split bill is for",
-      "Added Typewriter data sharing to transfer exact bill data between browsers and devices",
+    new: [],
+    improved: [
+      "Extracted Custom Account Modal into a separate component to fix dialog opening bugs",
     ],
-    improved: [],
     removed: [],
   },
   id: {
-    new: [
-      "Migrasi ke project React",
-      "Menambahkan kolom Nama Tempat / Resto untuk menandai tagihan ini untuk apa",
-      "Menambahkan fitur berbagi data Typewriter untuk memindahkan data tagihan yang sama persis antar browser dan perangkat",
+    new: [],
+    improved: [
+      "Memisahkan Custom Account Modal menjadi komponen terpisah untuk memperbaiki bug dialog yang tidak terbuka",
     ],
-    improved: [],
     removed: [],
   },
 };
