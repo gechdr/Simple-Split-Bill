@@ -36,13 +36,7 @@ function props(overrides: Record<string, unknown> = {}) {
     selectedValue: null,
     onChange: vi.fn(),
     label: "Bank",
-    customName: "",
-    customNumber: "",
-    customVendor: "",
-    onCustomNameChange: vi.fn(),
-    onCustomNumberChange: vi.fn(),
-    onCustomVendorChange: vi.fn(),
-    onSaveCustomAccount: vi.fn(),
+    onOpenCustomModal: vi.fn(),
     onDeleteAccount: vi.fn(),
     t,
     ...overrides,
@@ -72,23 +66,14 @@ describe("AccountSelector", () => {
     expect(p.onDeleteAccount).toHaveBeenCalledWith("123");
   });
 
-  it("opens custom modal and validates save", () => {
-    const p = props({
-      customName: "A",
-      customNumber: "12a",
-      customVendor: "B",
-    });
+  it("opens custom modal when CUSTOM option is clicked", () => {
+    const onOpenCustomModal = vi.fn();
+    const p = props({ onOpenCustomModal });
     render(<AccountSelector {...p} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Select account" }));
     fireEvent.click(screen.getByText(/Add new account/));
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    expect(screen.getByText("Name too short")).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(p.onCustomNameChange).toHaveBeenCalledWith("");
-    expect(p.onCustomNumberChange).toHaveBeenCalledWith("");
-    expect(p.onCustomVendorChange).toHaveBeenCalledWith("");
+    expect(onOpenCustomModal).toHaveBeenCalledTimes(1);
   });
 });

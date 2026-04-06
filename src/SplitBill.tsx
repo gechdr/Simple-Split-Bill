@@ -16,6 +16,7 @@ import { CalculatorWidget } from "./components/widgets/CalculatorWidget";
 import { ClockWidget } from "./components/widgets/ClockWidget";
 import { PaymentTrackerWidget } from "./components/widgets/PaymentTrackerWidget";
 import { ConfirmModal } from "./components/ConfirmModal";
+import { CustomAccountModal } from "./components/CustomAccountModal";
 
 function SplitBill() {
   const { t, showResetModal, setShowResetModal, resetAllData, typewriter } = useApp();
@@ -86,6 +87,7 @@ function SplitBill() {
             confirmText={t.reset}
             cancelText={t.cancel}
           />
+          <CustomAccountModal />
         </div>
       </div>
       <CalculatorWidget />

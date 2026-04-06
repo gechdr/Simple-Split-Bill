@@ -41,6 +41,8 @@ interface UIContextValue {
   setShowOCR: React.Dispatch<React.SetStateAction<boolean>>;
   showResetModal: boolean;
   setShowResetModal: React.Dispatch<React.SetStateAction<boolean>>;
+  showCustomAccountModal: boolean;
+  setShowCustomAccountModal: React.Dispatch<React.SetStateAction<boolean>>;
   showWhatsNew: boolean;
   setShowWhatsNew: React.Dispatch<React.SetStateAction<boolean>>;
   showBulkInsert: boolean;
@@ -117,6 +119,7 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
   });
   const [showOCR, setShowOCR] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showCustomAccountModal, setShowCustomAccountModal] = useState(false);
   const [showWhatsNew, setShowWhatsNew] = useState(false);
   const [showBulkInsert, setShowBulkInsert] = useState(false);
   const [bulkInsertText, setBulkInsertText] = useState("");
@@ -298,6 +301,7 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
     showPaymentTracker, setShowPaymentTracker,
     showOCR, setShowOCR,
     showResetModal, setShowResetModal,
+    showCustomAccountModal, setShowCustomAccountModal,
     showWhatsNew, setShowWhatsNew,
     showBulkInsert, setShowBulkInsert,
     bulkInsertText, setBulkInsertText,

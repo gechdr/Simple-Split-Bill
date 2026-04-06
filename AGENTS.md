@@ -2,153 +2,115 @@
 
 ## Project Overview
 
-Vite + React 19 + TypeScript application for splitting bills among groups. All dependencies installed via npm (no CDN).
+Vite + React 19 + TypeScript application for splitting bills among groups. All dependencies from npm (no CDN).
 
-**Tech Stack**: React 19, TypeScript, Vite 8, Tailwind CSS v4, Tesseract.js (OCR), dom-to-image (export).
+**Tech Stack**: React 19, TypeScript, Vite 8, Tailwind CSS v4, Tesseract.js (OCR), dom-to-image (export), msgpack (data sharing).
 
 ## Commands
 
-### Development
 ```bash
-# Start dev server
+# Dev server
 npm run dev
 
-# Build for production
+# Build (runs tests first via prebuild)
 npm run build
 
 # Preview production build
 npm run preview
+
+# Tests (watch mode)
+npm test
+
+# Tests once (CI mode)
+npm run test:run
+
+# Single test file
+npx vitest run src/test/useBillCalculator.test.ts
+
+# Test by pattern
+npx vitest run -t "useBillCalculator"
 ```
 
-### Testing / Linting
-- **No test framework** — manual testing in browser only
+- **Test framework**: Vitest + @testing-library/react (jsdom)
 - **No linter** — no ESLint or Prettier config
 - TypeScript strict mode is **disabled** (`strict: false` in tsconfig)
+- Tests live in `src/test/`. Setup at `src/test/setup.ts` provides localStorage mock + imports `@testing-library/jest-dom`.
 
-To verify changes, run `npm run dev` and test all features manually in the browser.
+## Architecture
 
-## Project Structure
+### Context Split (3 contexts)
+
+State is split across three providers, each with its own hook:
+
+| Hook | Source | Purpose |
+|------|--------|---------|
+| `useApp()` | `AppContext.tsx` | Language, dark mode, theme UI state |
+| `useBillData()` | `BillDataContext.tsx` | All bill data (items, persons, costs, accounts, payment status) + split calculations |
+| `useUI()` | `UIContext.tsx` | Modal visibility, widget toggles, OCR state, bulk insert |
+
+All three are combined via `AppProvider` in `AppContext.tsx`. Components should use the most specific hook — `useBillData()` for bill logic, `useUI()` for modals/widgets, `useApp()` for theme/lang.
+
+### Entry Points
+
+- `src/main.tsx` — React root
+- `src/App.tsx` — Wraps `SplitBill` in `AppProvider`
+- `src/SplitBill.tsx` — Thin composition layer (no state/logic)
+
+### Key Directories
 
 ```
-split-bill/
-├── index.html                  # Entry HTML (Vite, Google Fonts Roboto)
-├── index.copy.html             # Original single-file app (legacy)
-├── package.json
-├── vite.config.ts              # Vite + React + Tailwind plugins
-├── tsconfig.json
-├── AGENTS.md
-└── src/
-    ├── main.tsx                # React root entry point
-    ├── App.tsx                 # Wraps SplitBill in AppProvider
-    ├── SplitBill.tsx           # Thin composition layer (no state/logic)
-    ├── translations.ts         # EN/ID translation strings + Translations type
-    ├── index.css               # Tailwind import + dark mode variant + animations
-    ├── vite-env.d.ts           # Vite type declarations
-    ├── types/
-    │   └── index.ts            # TypeScript interfaces (BillItem, BankAccount, etc.)
-    ├── icons/
-    │   └── index.tsx           # All SVG icon components (22 icons)
-    ├── context/
-    │   └── AppContext.tsx      # Centralized state via React Context + useApp hook
-    ├── hooks/
-    │   ├── useLocalStorage.ts  # Generic localStorage persistence
-    │   ├── useBillCalculator.ts# Split calculation logic
-    │   ├── useDarkMode.ts      # Dark mode toggle with persistence
-    │   ├── useLanguage.ts      # Language toggle with translations
-    │   ├── useCalculator.ts    # Floating calculator widget state
-    │   ├── useClipboard.ts     # Image capture (download/copy)
-    │   ├── useDragWidget.ts    # Draggable widget positioning
-    │   └── useOCR.ts           # Receipt scanning with Tesseract.js
-    ├── utils/
-    │   ├── constants.ts        # App constants, defaults, changelog
-    │   ├── formatters.ts       # Money/calc display formatters
-    │   └── receiptParser.ts    # OCR text parsing
-    └── components/
-        ├── FormattedInput.tsx  # Currency/percentage input with Rp/% prefix
-        ├── AccountSelector.tsx # Bank account dropdown + custom account modal
-        ├── ConfirmModal.tsx    # Confirmation dialog modal
-        ├── Header.tsx          # Toolbar (lang, dark, OCR, reset toggles)
-        ├── OCRZone.tsx         # Receipt scanner drag-drop zone
-        ├── PeopleSection.tsx   # People list with search, autocomplete, bulk insert
-        ├── ItemCard.tsx        # Single item with drag, price toggle, person assignment
-        ├── ItemsSection.tsx    # Items list container with add button
-        ├── AdditionalCosts.tsx # Shipping, tax, parking, discounts, bank, rounding
-        ├── PersonAccordion.tsx # Expandable person bill breakdown
-        ├── PaymentSummary.tsx  # Summary with export/download/copy buttons
-        ├── StatusNotification.tsx  # OCR scanning overlay
-        ├── WhatsNewModal.tsx   # Version changelog modal
-        ├── BulkInsertModal.tsx # Bulk person:item paste modal
-        └── widgets/
-            ├── CalculatorWidget.tsx    # Floating calculator
-            ├── ClockWidget.tsx         # Analog + digital clock
-            └── PaymentTrackerWidget.tsx# Paid/unpaid tracker
+src/
+  context/          # BillDataContext.tsx (data + calc), UIContext.tsx (UI state), AppContext.tsx (combines all 3)
+  hooks/            # useLocalStorage, useBillCalculator, useOCR, useDarkMode, useLanguage, useCalculator, useClipboard, useDragWidget
+  components/       # All UI components + widgets/ subdirectory
+  utils/            # constants.ts (APP_VERSION, changelog, defaults), formatters.ts, receiptParser.ts
+  types/index.ts    # BillItem, BankAccount, TaxType, SplitResult, Translations
+  icons/index.tsx   # 22 SVG icon components
+  translations.ts   # EN/ID strings + Translations type
 ```
 
-## Code Style & Conventions
+### New/Changed Components (since v2.8.0)
 
-### Architecture
-- **Context-driven**: All state managed via `AppContext` with `useApp()` hook
-- **Custom hooks**: Business logic extracted into dedicated hooks (calc, OCR, dark mode, etc.)
-- **Composition layer**: `SplitBill.tsx` is a thin component that assembles sections — no state or logic
-- **localStorage persistence**: Handled by `useLocalStorage` hook + `AppContext` provider
+- `CustomAccountModal.tsx` — Standalone modal for adding bank accounts (extracted from AccountSelector to fix dialog bugs)
+- `BillInfoSection.tsx` — Place/resto name display
+- `TypewriterModal.tsx` — Data sharing via typewriter effect + msgpack encoding
+- `DataWarningModal.tsx` — Data transfer warnings
+- `AccountSelector.tsx` — Dropdown only (no longer contains custom modal inline; calls `onOpenCustomModal()` instead)
 
-### Imports & Dependencies
-- All dependencies from npm (no CDN):
-  - `react`, `react-dom` — UI framework
-  - `tesseract.js` — OCR engine
-  - `dom-to-image` — image export
-  - `tailwindcss`, `@tailwindcss/vite` — styling
-- Components access state via `useApp()` — avoid prop drilling
-- Import types from `../types`, icons from `../icons`, utils/hooks from barrel exports
-
-### Naming Conventions
-- **Components**: PascalCase (`SplitBill`, `PersonAccordion`, `CalculatorWidget`)
-- **Hooks**: camelCase with `use` prefix (`useBillCalculator`, `useOCR`)
-- **Utils**: camelCase (`formatMoney`, `parseReceiptText`)
-- **Constants**: UPPER_SNAKE_CASE (`STORAGE_KEY`, `APP_VERSION`)
-- **State variables**: camelCase (`items`, `persons`, `darkMode`, `roundTo100`)
-- **Event handlers**: camelCase, action-prefixed (`handleScanReceipt`, `addItem`)
-- **Mixed language**: Indonesian variable names preserved (`ongkir`, `biayaLayanan`, `diskon`, `voucher`)
+## Code Conventions
 
 ### State Management
-- Centralized in `AppContext.tsx` via `useLocalStorage` hook
-- Heavy use of `useState` (30+ state variables)
-- `useEffect` for: localStorage sync, dark mode, language persistence, clipboard paste, clock timer
-- No reducers, no external state libraries
+- All state via context hooks — never duplicate state in components
+- localStorage persistence via `useLocalStorage` hook
 - Item shape: `{ id, name, price, persons: { [name]: quantity }, priceType: "unit" | "total" }`
+- Item IDs: `Date.now() + Math.random() * 1000000`
+- When adding state, include it in the appropriate context provider and `useLocalStorage` persisted data
+
+### Imports
+- Components access state via `useApp()`, `useBillData()`, or `useUI()` — avoid prop drilling
+- Import types from `../types`, icons from `../icons`, utils/hooks from barrel exports
+- Context barrel: `import { useApp, useBillData, useUI } from "../context"`
+
+### Naming
+- Indonesian variable names preserved: `ongkir`, `biayaLayanan`, `diskon`, `voucher`
+- Components: PascalCase | Hooks: `use` prefix | Utils: camelCase | Constants: UPPER_SNAKE_CASE
 
 ### Styling
-- **Tailwind CSS v4** via `@tailwindcss/vite` plugin
-- Dark mode via `class` strategy — configured with `@custom-variant dark (&:where(.dark, .dark *));` in `index.css`
-- Responsive: `sm:` prefix for mobile-first
-- Custom animations: `animate-slide-down`, `animate-fade-in` (defined in `index.css`)
-- Common patterns: `rounded-xl`, `shadow-lg`, `border`, `transition`, `focus:ring-1`
+- Tailwind CSS v4 via `@tailwindcss/vite` plugin
+- Dark mode via `class` strategy — `@custom-variant dark (&:where(.dark, .dark *));` in `index.css`
+- Custom animations: `animate-slide-down`, `animate-fade-in` (in `index.css`)
 - Use `text-base sm:text-sm` for inputs to prevent iOS zoom
-- Font: Google Fonts Roboto
 
 ### Formatting
-- **2-space indentation**
-- Semicolons used consistently
-- Trailing commas in multi-line arrays/objects
-- JSX attributes on separate lines when >2 props
+- 2-space indentation, semicolons, trailing commas
 - `Number(value || 0)` pattern for safe numeric conversion
+- JSX attributes on separate lines when >2 props
+
+### i18n
+- `translations` object with `en` and `id` keys, typed via `Translations` interface
+- All UI text must be translatable — add keys to both language objects
 
 ### Error Handling
 - `try/catch` around all `localStorage` access
-- `console.error()` for OCR, image export, localStorage failures
-- User-facing errors via temporary status messages (`setCaptureStatus` + `setTimeout` clear)
-- Input validation in `AccountSelector` with per-field error state
+- User-facing errors via temporary status messages (`setTimeout` clear after 2000ms)
 - Graceful fallbacks: `Number(value || 0)`, `item.persons[person] || 0`
-
-### Internationalization (i18n)
-- `translations` object with `en` and `id` keys, typed via `Translations` interface
-- Access via `useLanguage()` hook which returns `t = translations[language]`
-- All UI text must be translatable — add keys to both language objects
-
-### Key Patterns
-- When adding state, include it in `AppContext` provider and `useLocalStorage` persisted data
-- Use existing icon components before adding new SVGs
-- Currency formatting: `toLocaleString("id-ID")`
-- Item IDs: `Date.now() + Math.random() * 1000000`
-- Status messages auto-clear after 2000ms via `setTimeout`
-- Components should use `useApp()` context — never duplicate state

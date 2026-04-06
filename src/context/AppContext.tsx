@@ -89,6 +89,8 @@ interface AppContextValue {
   setShowOCR: React.Dispatch<React.SetStateAction<boolean>>;
   showResetModal: boolean;
   setShowResetModal: React.Dispatch<React.SetStateAction<boolean>>;
+  showCustomAccountModal: boolean;
+  setShowCustomAccountModal: React.Dispatch<React.SetStateAction<boolean>>;
   showWhatsNew: boolean;
   setShowWhatsNew: React.Dispatch<React.SetStateAction<boolean>>;
   showBulkInsert: boolean;

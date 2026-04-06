@@ -24,15 +24,9 @@ export const AdditionalCosts: React.FC = () => {
     bankAccounts,
     selectedAccount,
     setSelectedAccount,
-    customAccountName,
-    setCustomAccountName,
-    customAccountNumber,
-    setCustomAccountNumber,
-    customAccountVendor,
-    setCustomAccountVendor,
     roundTo100,
     setRoundTo100,
-    saveCustomAccount,
+    setShowCustomAccountModal,
     deleteBankAccount,
   } = useApp();
 
@@ -69,13 +63,7 @@ export const AdditionalCosts: React.FC = () => {
           options={bankAccounts}
           selectedValue={selectedAccount}
           onChange={(v) => setSelectedAccount(v)}
-          customName={customAccountName}
-          customNumber={customAccountNumber}
-          customVendor={customAccountVendor}
-          onCustomNameChange={setCustomAccountName}
-          onCustomNumberChange={setCustomAccountNumber}
-          onCustomVendorChange={setCustomAccountVendor}
-          onSaveCustomAccount={saveCustomAccount}
+          onOpenCustomModal={() => setShowCustomAccountModal(true)}
           onDeleteAccount={deleteBankAccount}
           t={t}
         />
