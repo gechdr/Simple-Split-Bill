@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getStorageField, setStorageField } from "../utils/storage";
 
 export function useLocalStorage<T>(
   key: string,
@@ -6,8 +7,9 @@ export function useLocalStorage<T>(
 ): [T, (value: T | ((prev: T) => T)) => void] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
-      const item = localStorage.getItem(key);
-      return item ? (JSON.parse(item) as T) : initialValue;
+      const fromUnifiedStorage = getStorageField<T>(key);
+      if (typeof fromUnifiedStorage !== "undefined") return fromUnifiedStorage;
+      return initialValue;
     } catch {
       return initialValue;
     }
@@ -18,7 +20,7 @@ export function useLocalStorage<T>(
       const valueToStore =
         value instanceof Function ? value(storedValue) : value;
       setStoredValue(valueToStore);
-      localStorage.setItem(key, JSON.stringify(valueToStore));
+      setStorageField(key, valueToStore);
     } catch (error) {
       console.error("Error saving to localStorage:", error);
     }

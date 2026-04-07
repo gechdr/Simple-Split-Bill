@@ -4,6 +4,7 @@
  */
 
 import { STORAGE_KEYS } from "./constants";
+import { readStorageData, writeStorageData } from "./storage";
 
 export function encodeToBase64(data: string): string {
   try {
@@ -26,15 +27,12 @@ export function decodeFromBase64(encoded: string): string {
 export function getAllStorageData(): Record<string, unknown> {
   const data: Record<string, unknown> = {};
   try {
-    // Collect all storage keys defined in STORAGE_KEYS
+    const unifiedData = readStorageData();
+
+    // Collect all bill data fields from unified storage.
     STORAGE_KEYS.forEach((key) => {
-      const value = localStorage.getItem(key);
-      if (value !== null) {
-        try {
-          data[key] = JSON.parse(value);
-        } catch {
-          data[key] = value;
-        }
+      if (key in unifiedData) {
+        data[key] = unifiedData[key];
       }
     });
   } catch (e) {
@@ -45,13 +43,16 @@ export function getAllStorageData(): Record<string, unknown> {
 
 export function setAllStorageData(data: Record<string, unknown>): void {
   try {
-    // Only set keys that are in STORAGE_KEYS
+    const nextData = readStorageData();
+
+    // Only set bill data fields that are in STORAGE_KEYS.
     STORAGE_KEYS.forEach((key) => {
       if (key in data) {
-        const value = data[key];
-        localStorage.setItem(key, typeof value === "string" ? value : JSON.stringify(value));
+        nextData[key] = data[key];
       }
     });
+
+    writeStorageData(nextData);
     // Trigger storage event for components to update
     window.dispatchEvent(new Event("storage"));
   } catch (e) {

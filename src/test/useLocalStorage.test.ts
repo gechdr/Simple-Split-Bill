@@ -1,6 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { STORAGE_KEY } from "../utils/constants";
+
+function readUnifiedStorage() {
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") as Record<string, unknown>;
+}
 
 describe("useLocalStorage", () => {
   beforeEach(() => {
@@ -14,13 +19,13 @@ describe("useLocalStorage", () => {
   });
 
   it("reads stored value and writes updates", () => {
-    localStorage.setItem("k2", JSON.stringify(20));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ k2: 20 }));
     const { result } = renderHook(() => useLocalStorage("k2", 10));
 
     expect(result.current[0]).toBe(20);
 
     act(() => result.current[1](25));
-    expect(localStorage.getItem("k2")).toBe("25");
+    expect(readUnifiedStorage().k2).toBe(25);
   });
 
   it("supports updater function", () => {

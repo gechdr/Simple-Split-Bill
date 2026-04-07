@@ -2,7 +2,7 @@ import React, { createContext, useContext } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
 import { useBillCalculator } from "../hooks/useBillCalculator";
 import type { BillItem, BankAccount, TaxType, SplitResult } from "../types";
-import { STORAGE_KEY, DEFAULT_ITEM, DEFAULT_BANK_ACCOUNT } from "../utils/constants";
+import { DEFAULT_ITEM, DEFAULT_BANK_ACCOUNT } from "../utils/constants";
 
 interface BillDataContextValue {
   placeName: string;
@@ -63,23 +63,23 @@ export function useBillData(): BillDataContextValue {
 }
 
 export function BillDataProvider({ children }: { children: React.ReactNode }) {
-  const [placeName, setPlaceName] = useLocalStorage<string>(`${STORAGE_KEY}_placeName`, "");
-  const [items, setItems] = useLocalStorage<BillItem[]>(`${STORAGE_KEY}_items`, [DEFAULT_ITEM]);
-  const [persons, setPersons] = useLocalStorage<string[]>(`${STORAGE_KEY}_persons`, []);
-  const [ongkir, setOngkir] = useLocalStorage<string>(`${STORAGE_KEY}_ongkir`, "");
-  const [biayaLayanan, setBiayaLayanan] = useLocalStorage<string>(`${STORAGE_KEY}_biayaLayanan`, "");
-  const [tax, setTax] = useLocalStorage<string>(`${STORAGE_KEY}_tax`, "");
-  const [taxType, setTaxType] = useLocalStorage<TaxType>(`${STORAGE_KEY}_taxType`, "percentage");
-  const [parking, setParking] = useLocalStorage<string>(`${STORAGE_KEY}_parking`, "0");
-  const [diskon, setDiskon] = useLocalStorage<string>(`${STORAGE_KEY}_diskon`, "");
-  const [voucher, setVoucher] = useLocalStorage<string>(`${STORAGE_KEY}_voucher`, "");
-  const [bankAccounts, setBankAccounts] = useLocalStorage<BankAccount[]>(`${STORAGE_KEY}_bankAccounts`, [DEFAULT_BANK_ACCOUNT]);
-  const [selectedAccount, setSelectedAccount] = useLocalStorage<string | null>(`${STORAGE_KEY}_selectedAccount`, null);
-  const [customAccountName, setCustomAccountName] = useLocalStorage<string>(`${STORAGE_KEY}_customAccountName`, "");
-  const [customAccountNumber, setCustomAccountNumber] = useLocalStorage<string>(`${STORAGE_KEY}_customAccountNumber`, "");
-  const [customAccountVendor, setCustomAccountVendor] = useLocalStorage<string>(`${STORAGE_KEY}_customAccountVendor`, "");
-  const [roundTo100, setRoundTo100] = useLocalStorage<boolean>(`${STORAGE_KEY}_roundTo100`, false);
-  const [paymentStatus, setPaymentStatus] = useLocalStorage<Record<string, boolean>>(`${STORAGE_KEY}_paymentStatus`, {});
+  const [placeName, setPlaceName] = useLocalStorage<string>("placeName", "");
+  const [items, setItems] = useLocalStorage<BillItem[]>("items", [DEFAULT_ITEM]);
+  const [persons, setPersons] = useLocalStorage<string[]>("persons", []);
+  const [ongkir, setOngkir] = useLocalStorage<string>("ongkir", "");
+  const [biayaLayanan, setBiayaLayanan] = useLocalStorage<string>("biayaLayanan", "");
+  const [tax, setTax] = useLocalStorage<string>("tax", "");
+  const [taxType, setTaxType] = useLocalStorage<TaxType>("taxType", "percentage");
+  const [parking, setParking] = useLocalStorage<string>("parking", "0");
+  const [diskon, setDiskon] = useLocalStorage<string>("diskon", "");
+  const [voucher, setVoucher] = useLocalStorage<string>("voucher", "");
+  const [bankAccounts, setBankAccounts] = useLocalStorage<BankAccount[]>("bankAccounts", [DEFAULT_BANK_ACCOUNT]);
+  const [selectedAccount, setSelectedAccount] = useLocalStorage<string | null>("selectedAccount", null);
+  const [customAccountName, setCustomAccountName] = useLocalStorage<string>("customAccountName", "");
+  const [customAccountNumber, setCustomAccountNumber] = useLocalStorage<string>("customAccountNumber", "");
+  const [customAccountVendor, setCustomAccountVendor] = useLocalStorage<string>("customAccountVendor", "");
+  const [roundTo100, setRoundTo100] = useLocalStorage<boolean>("roundTo100", false);
+  const [paymentStatus, setPaymentStatus] = useLocalStorage<Record<string, boolean>>("paymentStatus", {});
 
   const splitResult = useBillCalculator({ items, persons, ongkir, biayaLayanan, tax, taxType, parking, diskon, voucher });
 

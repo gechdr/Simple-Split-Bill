@@ -26,8 +26,8 @@ export function useTypewriter({ t, onDataLoaded }: UseTypewriterProps) {
       if (existingData && Object.keys(existingData).length > 0) {
         try {
           // Check if there's meaningful data (not just defaults)
-          const persons = existingData["splitBillData_persons"] as string[] | undefined;
-          const items = existingData["splitBillData_items"] as any[] | undefined;
+          const persons = existingData.persons as string[] | undefined;
+          const items = existingData.items as any[] | undefined;
           const hasExistingData =
             (persons && persons.length > 0) ||
             (items && items.some((item: any) => item.name || item.price));

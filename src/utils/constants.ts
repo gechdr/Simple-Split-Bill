@@ -1,31 +1,32 @@
 import type { BillItem, BankAccount } from "../types";
 
 export const STORAGE_KEY = "splitBillData";
-export const LANGUAGE_KEY = "splitBillLanguage";
-export const VERSION_KEY = "splitBillSeenVersion";
-export const SHOW_CALCULATOR_KEY = "splitBillShowCalculator";
-export const SHOW_PAYMENT_TRACKER_KEY = "splitBillShowPaymentTracker";
+export const LANGUAGE_KEY = "language";
+export const VERSION_KEY = "seenVersion";
+export const SHOW_CALCULATOR_KEY = "showCalculator";
+export const SHOW_PAYMENT_TRACKER_KEY = "showPaymentTracker";
+export const DARK_MODE_KEY = "darkMode";
 export const APP_VERSION = "v2.8.2";
 
-// All storage keys used by the app
+// Bill data field names inside localStorage[STORAGE_KEY] JSON object
 export const STORAGE_KEYS = [
-  `${STORAGE_KEY}_placeName`,
-  `${STORAGE_KEY}_items`,
-  `${STORAGE_KEY}_persons`,
-  `${STORAGE_KEY}_ongkir`,
-  `${STORAGE_KEY}_biayaLayanan`,
-  `${STORAGE_KEY}_tax`,
-  `${STORAGE_KEY}_taxType`,
-  `${STORAGE_KEY}_parking`,
-  `${STORAGE_KEY}_diskon`,
-  `${STORAGE_KEY}_voucher`,
-  `${STORAGE_KEY}_bankAccounts`,
-  `${STORAGE_KEY}_selectedAccount`,
-  `${STORAGE_KEY}_customAccountName`,
-  `${STORAGE_KEY}_customAccountNumber`,
-  `${STORAGE_KEY}_customAccountVendor`,
-  `${STORAGE_KEY}_roundTo100`,
-  `${STORAGE_KEY}_paymentStatus`,
+  "placeName",
+  "items",
+  "persons",
+  "ongkir",
+  "biayaLayanan",
+  "tax",
+  "taxType",
+  "parking",
+  "diskon",
+  "voucher",
+  "bankAccounts",
+  "selectedAccount",
+  "customAccountName",
+  "customAccountNumber",
+  "customAccountVendor",
+  "roundTo100",
+  "paymentStatus",
 ] as const;
 
 export const WIDGET_DEFAULT_OFFSET = 320;

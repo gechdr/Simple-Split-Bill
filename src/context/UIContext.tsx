@@ -103,16 +103,18 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
   const [itemPersonSearch, setItemPersonSearch] = useState<Record<number, string>>({});
   const [showCalculator, setShowCalculator] = useState(() => {
     try {
-      const saved = localStorage.getItem(SHOW_CALCULATOR_KEY);
-      return saved === "true";
+      const directValue = localStorage.getItem(SHOW_CALCULATOR_KEY);
+      if (directValue === "true" || directValue === "false") return directValue === "true";
+      return false;
     } catch {
       return false;
     }
   });
   const [showPaymentTracker, setShowPaymentTracker] = useState(() => {
     try {
-      const saved = localStorage.getItem(SHOW_PAYMENT_TRACKER_KEY);
-      return saved === "true";
+      const directValue = localStorage.getItem(SHOW_PAYMENT_TRACKER_KEY);
+      if (directValue === "true" || directValue === "false") return directValue === "true";
+      return false;
     } catch {
       return false;
     }
@@ -145,13 +147,18 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const seenVersion = localStorage.getItem(VERSION_KEY);
-    if (seenVersion !== APP_VERSION) setShowWhatsNew(true);
+    const directVersion = localStorage.getItem(VERSION_KEY);
+    if (typeof directVersion === "string") {
+      if (directVersion !== APP_VERSION) setShowWhatsNew(true);
+      return;
+    }
+
+    setShowWhatsNew(true);
   }, []);
 
   useEffect(() => {
     try {
-      localStorage.setItem(SHOW_CALCULATOR_KEY, showCalculator.toString());
+      localStorage.setItem(SHOW_CALCULATOR_KEY, String(showCalculator));
     } catch (error) {
       console.error("Error saving calculator preference:", error);
     }
@@ -159,7 +166,7 @@ export function UIProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem(SHOW_PAYMENT_TRACKER_KEY, showPaymentTracker.toString());
+      localStorage.setItem(SHOW_PAYMENT_TRACKER_KEY, String(showPaymentTracker));
     } catch (error) {
       console.error("Error saving payment tracker preference:", error);
     }
