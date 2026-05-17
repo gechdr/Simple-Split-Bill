@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useApp } from "../context";
 import { Download, Copy, DollarSign, CreditCard } from "../icons";
 import { formatMoney } from "../utils/formatters";
@@ -7,6 +7,7 @@ import { PersonAccordion } from "./PersonAccordion";
 export const PaymentSummary: React.FC = () => {
   const {
     t,
+    language,
     placeName,
     persons,
     taxType,
@@ -22,19 +23,33 @@ export const PaymentSummary: React.FC = () => {
 
   const { subtotal, taxAmount, totalDiscount, grandTotal, sharedFees } = splitResult;
 
+  const today = useMemo(() => {
+    const dateLocale = language === "id" ? "id-ID" : "en-GB";
+    return new Date().toLocaleDateString(dateLocale, {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  }, [language]);
+
   if (subtotal === 0 || persons.length === 0) return null;
 
   return (
     <>
       <div className="mb-6 overflow-hidden rounded-xl border-2 border-gray-300 dark:border-gray-700 shadow-md smooth-surface">
         <div ref={summaryRef} className="bg-white dark:bg-gray-800 p-5 sm:p-8">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="bg-gray-900 dark:bg-gray-700 rounded-full p-1.5">
-              <DollarSign className="w-5 h-5 text-white" />
+          <div className="flex items-center justify-between gap-3 mb-5">
+            <div className="flex items-center gap-3">
+              <div className="bg-gray-900 dark:bg-gray-700 rounded-full p-1.5">
+                <DollarSign className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide leading-none whitespace-nowrap">
+                {t.paymentSummary}
+              </h2>
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 uppercase tracking-wide leading-none whitespace-nowrap">
-              {t.paymentSummary}
-            </h2>
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+              {today}
+            </span>
           </div>
           {placeName?.trim() && (
             <div className="mb-5 rounded-xl border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-3">
