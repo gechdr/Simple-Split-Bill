@@ -78,7 +78,7 @@ pipeline {
                     try {
                         deployOutput = sh(
                             script: """
-                                . /home/marmar/.bash_profile
+                                . /home/marmar/.bash_bun
                                 npx wrangler pages deploy ./dist --project-name=smangka
                             """,
                             returnStdout: true
