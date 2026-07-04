@@ -30,7 +30,7 @@ def sendDiscordMessage(data) {
 }
 
 pipeline {
-  agent { label "alien" }
+  agent { label "chisato" }
 
   environment {
     IMAGE_STAGE = 'oven/bun:slim'
@@ -109,7 +109,7 @@ pipeline {
             color: 1127128
           ],
           [
-            title: "Build Output",
+            title: "Wrangler Output",
             description: "```${deployOutput}```",
             color: 1127128
           ]]
