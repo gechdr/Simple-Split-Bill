@@ -79,7 +79,7 @@ pipeline {
                         deployOutput = sh(
                             script: """
                                 . /home/marmar/.bash_bun
-                                npx wrangler pages deploy ./dist --project-name=smangka
+                                wrangler pages deploy ./dist --project-name=smangka
                             """,
                             returnStdout: true
                         ).trim()
