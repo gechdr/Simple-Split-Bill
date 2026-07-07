@@ -72,13 +72,18 @@ pipeline {
     }
 
     stage('Sync Build To S3') {
+        agent {
+            docker {
+                image "marmar76/wrangler-cli:latest"
+                reuseNode true
+            }
+        }
         steps {
             script {
                 withCredentials([string(credentialsId: 'CLOUDFLARE_MARMAR', variable: 'CLOUDFLARE_API_TOKEN')]) {
                     try {
                         deployOutput = sh(
                             script: """
-                                . /home/marmar/.bash_bun
                                 wrangler pages deploy ./dist --project-name=smangka
                             """,
                             returnStdout: true
